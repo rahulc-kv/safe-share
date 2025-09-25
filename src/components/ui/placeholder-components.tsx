@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // Placeholder components for complex UI elements
 // TODO: Replace with proper shadcn/ui components
 
-import * as React from "react"
 import { cn } from "@/lib/utils"
 
 // Tabs
