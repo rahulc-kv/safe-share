@@ -22,7 +22,14 @@ export function IncidentFilters({ filters, setFilters }: IncidentFiltersProps) {
           value={filters.sev} 
           onValueChange={(v:any) => setFilters((f) => ({ ...f, sev: v }))}
         >
-          <SelectTrigger><SelectValue placeholder="All" /></SelectTrigger>
+          <SelectTrigger>
+            <SelectValue placeholder="All">
+              {filters.sev === "all" ? "All" : 
+               filters.sev === "high" ? "High" : 
+               filters.sev === "med" ? "Medium" : 
+               filters.sev === "low" ? "Low" : "All"}
+            </SelectValue>
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All</SelectItem>
             <SelectItem value="high">High</SelectItem>
@@ -37,7 +44,12 @@ export function IncidentFilters({ filters, setFilters }: IncidentFiltersProps) {
           value={filters.entity} 
           onValueChange={(v: any) => setFilters((f) => ({ ...f, entity: v }))}
         >
-          <SelectTrigger><SelectValue placeholder="Any" /></SelectTrigger>
+          <SelectTrigger>
+            <SelectValue placeholder="Any">
+              {filters.entity === "any" ? "Any" : 
+               ENTITIES.find(e => e.type === filters.entity)?.type || "Any"}
+            </SelectValue>
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="any">Any</SelectItem>
             {ENTITIES.map(e => (
