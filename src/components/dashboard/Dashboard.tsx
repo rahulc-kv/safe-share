@@ -3,8 +3,10 @@ import { useMemo } from 'react';
 // import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { DonutChart } from '@/components/ui/donut-chart';
+import { LineChart } from '@/components/ui/line-chart';
 // import { AlertTriangle, CheckCircle2, Download } from 'lucide-react';
 import type { Incident } from '../../types';
+import { supabaseApi } from '@/supabase/api';
 
 interface DashboardProps {
   incidents: Incident[];
@@ -42,23 +44,6 @@ const ProgressBar = ({
   );
 };
 
-const MiniBar = () => {
-  const bars = [38, 45, 28, 31];
-  return (
-    <div className="grid h-40 w-full grid-cols-4 items-end gap-3">
-      {bars.map((h, i) => (
-        <div key={i} className="flex flex-col items-center gap-2">
-          <div
-            className="w-full rounded-md bg-emerald-500"
-            style={{ height: `${h * 2.2}px` }}
-          />
-          <div className="text-xs text-muted-foreground">Week {i + 1}</div>
-        </div>
-      ))}
-    </div>
-  );
-};
-
 export function Dashboard({ incidents }: DashboardProps) {
   const { override } = useMemo(() => {
     const alerts = incidents.filter(i => i.tab === "alert").length;
@@ -69,7 +54,15 @@ export function Dashboard({ incidents }: DashboardProps) {
       override: Math.round((alerts / shown) * 100),
     };
   }, [incidents]);
-
+  supabaseApi.channel('users-changes')
+  .on(
+    'postgres_changes',
+    { event: '*', schema: 'public', table: 'users' },
+    (payload) => {
+      console.log('Realtime event:', payload)
+    }
+  )
+  .subscribe()
   // Donut chart data for violation types
   const donutData = {
     labels: ['PAN Numbers', 'Email Addresses', 'Phone Numbers', 'Aadhaar Numbers'],
@@ -101,14 +94,14 @@ export function Dashboard({ incidents }: DashboardProps) {
       {
         data: [35, 28, 22],
         backgroundColor: [
-          '#ef4444', // red-500
-          '#f59e0b', // amber-500
-          '#3b82f6', // blue-500
+          '#E53935', // red-500
+          '#FB8C00', // amber-500
+          '#1E88E5', // blue-500
         ],
         borderColor: [
-          '#ef4444',
-          '#f59e0b',
-          '#3b82f6',
+          '#E53935',
+          '#FB8C00',
+          '#1E88E5',
         ],
         borderWidth: 0,
       },
@@ -116,6 +109,19 @@ export function Dashboard({ incidents }: DashboardProps) {
   };
 
   const totalAlerts = 235 + 28 + 22; // Sum of all alert data
+
+  // Line chart data for performance trends
+  const lineChartData = {
+    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+    datasets: [
+      {
+        label: 'Acknowledgement Rate',
+        data: [38, 45, 28, 31],
+        borderColor: '#10b981', // emerald-500
+        tension: 0.4,
+      },
+    ],
+  };
 
   return (
     <div className="space-y-4">
@@ -131,13 +137,13 @@ export function Dashboard({ incidents }: DashboardProps) {
             />
             <div className='flex flex-row gap-2 text-[14px]'>
               <div className='bg-muted rounded-md px-2'>
-                <span className='inline-flex h-2 w-2 mr-1 rounded-full bg-[#ef4444]' />
+                <span className='inline-flex h-2 w-2 mr-1 rounded-full bg-[#E53935]' />
                 High</div>
                 <div className='bg-muted rounded-md px-2'>
-                <span className='inline-flex h-2 w-2 mr-1 rounded-full bg-[#f59e0b]' />
+                <span className='inline-flex h-2 w-2 mr-1 rounded-full bg-[#FB8C00]' />
                 Medium</div>
                 <div className='bg-muted rounded-md px-2'>
-                <span className='inline-flex h-2 w-2 mr-1 rounded-full bg-[#3b82f6]' />
+                <span className='inline-flex h-2 w-2 mr-1 rounded-full bg-[#1E88E5]' />
                 Low</div>
             </div>
             {/* <CardTitle className="text-3xl">{ack}%</CardTitle> */}
@@ -184,7 +190,7 @@ export function Dashboard({ incidents }: DashboardProps) {
             <CardDescription>Weekly acknowledgement and override rates</CardDescription>
           </CardHeader>
           <CardContent>
-            <MiniBar />
+            <LineChart data={lineChartData} />
           </CardContent>
         </Card>
         <Card>
