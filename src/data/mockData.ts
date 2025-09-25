@@ -1,5 +1,5 @@
-import type { User, Channel, Entity, PolicyData, Incident } from '../types';
-import { makeIncident } from '../utils/helpers';
+import type { User, Channel, Entity, PolicyData } from '../types';
+// import { makeIncident } from '../utils/helpers';
 
 export const USERS: User[] = [
   { id: "u1", name: "Anika Rao", email: "anika.rao@example.com", dept: "Finance", manager: "meera.k@example.com" },
@@ -36,11 +36,11 @@ export const INITIAL_POLICIES: PolicyData[] = [
       entities: [{ type: "PAN" }, { type: "AWS_SECRET" }], 
       thresholds: { severity: { nudge: 30, soft: 60, hard: 80 } } 
     }, 
-    mode: "soft", 
+    mode: ["soft"], 
     scope: { users: ["*"], groups: ["Finance", "Delivery"], apps: ["*"] }, 
     exceptions: [], 
     version: "1.2.0", 
-    status: "published" 
+    status: "active" 
   },
   { 
     id: "pol_2", 
@@ -55,11 +55,11 @@ export const INITIAL_POLICIES: PolicyData[] = [
       entities: [{ type: "Aadhaar" }], 
       thresholds: { severity: { nudge: 20, soft: 50, hard: 75 } }
     }, 
-    mode: "nudge", 
+    mode: ["nudge"], 
     scope: { users: ["*"], groups: ["Sales"], apps: ["*"] }, 
     exceptions: [], 
     version: "1.0.3", 
-    status: "published" 
+    status: "active" 
   },
   { 
     id: "pol_2", 
@@ -74,15 +74,15 @@ export const INITIAL_POLICIES: PolicyData[] = [
       entities: [{ type: "Aadhaar" }], 
       thresholds: { severity: { nudge: 20, soft: 50, hard: 75 } }
     }, 
-    mode: "nudge", 
+    mode: ["nudge"], 
     scope: { users: ["*"], groups: ["Sales"], apps: ["*"] }, 
     exceptions: [], 
     version: "1.0.3", 
-    status: "published" 
+    status: "active" 
   },
 ];
 
-export const INITIAL_INCIDENTS: Incident[] = [
-  ...Array.from({ length: 6 }, () => makeIncident(true, USERS, CHANNELS, ENTITIES)),
-  ...Array.from({ length: 10 }, () => makeIncident(false, USERS, CHANNELS, ENTITIES)),
-];
+// export const INITIAL_INCIDENTS: Incident[] = [
+//   ...Array.from({ length: 6 }, () => makeIncident(true, USERS, CHANNELS, ENTITIES)),
+//   ...Array.from({ length: 10 }, () => makeIncident(false, USERS, CHANNELS, ENTITIES)),
+// ];

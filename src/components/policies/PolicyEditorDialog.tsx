@@ -19,57 +19,58 @@ interface PolicyEditorDialogProps {
 export function PolicyEditorDialog({ open, setOpen, save, initial }: PolicyEditorDialogProps) {
   const [form, setForm] = useState<PolicyForm>({
     name: "",
-    author: "",
+    // author: "",
     tags: "",
-    source_type: "internal",
-    source_mapping: "",
+    // source_type: "internal",
+    // source_mapping: "",
     description: "",
     prompt: "",
     mode: "nudge",
     version: "1.0.0",
-    status: "draft"
+    status: "inactive"
   });
 
   useEffect(() => {
     if (initial) {
       setForm({
         name: initial.name,
-        author: initial.author,
+        // author: initial.author,
         tags: initial.tags.join(", "),
-        source_type: initial.source_type,
-        source_mapping: initial.source_mapping.join(", "),
+        // source_type: initial.source_type,
+        // source_mapping: initial.source_mapping.join(", "),
         description: initial.description,
         prompt: initial.prompt,
-        mode: initial.mode,
+        mode: initial.mode.join(", "),
         version: initial.version,
-        status: initial.status
+        status: initial.status,
+
       });
     } else {
       setForm({
         name: "",
-        author: "",
+        // author: "",
         tags: "",
-        source_type: "internal",
-        source_mapping: "",
+        // source_type: "internal",
+        // source_mapping: "",
         description: "",
         prompt: "",
         mode: "nudge",
         version: "1.0.0",
-        status: "draft"
+        status: "inactive"
       });
     }
   }, [initial, open]);
 
   function handleSave() {
     const tags = String(form.tags || "").split(",").map((s) => s.trim()).filter(Boolean);
-    const mapping = String(form.source_mapping || "").split(",").map((s) => s.trim()).filter(Boolean);
+    // const mapping = String(form.source_mapping || "").split(",").map((s) => s.trim()).filter(Boolean);
     const payload: PolicyData = {
       id: initial?.id || `pol_${randId()}`,
       name: form.name,
-      author: form.author,
+      // author: form.author,
       tags,
-      source_type: form.source_type,
-      source_mapping: mapping,
+      // source_type: form.source_type,
+      // source_mapping: mapping,
       description: form.description,
       prompt: form.prompt,
       rule_logic: { 
@@ -82,7 +83,7 @@ export function PolicyEditorDialog({ open, setOpen, save, initial }: PolicyEdito
           } 
         } 
       },
-      mode: form.mode,
+      mode: form.mode.split(","),
       scope: { users: ["*"], groups: ["*"], apps: ["*"] },
       exceptions: [],
       version: form.version,
@@ -92,7 +93,7 @@ export function PolicyEditorDialog({ open, setOpen, save, initial }: PolicyEdito
     setOpen(false);
   }
 
-  const valid = form.name && form.author && form.prompt;
+  const valid = form.name && form.prompt;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -185,12 +186,12 @@ export function PolicyEditorDialog({ open, setOpen, save, initial }: PolicyEdito
             <Label>Status</Label>
             <Select 
               value={form.status} 
-              onValueChange={(v: "draft" | "published") => setForm({ ...form, status: v })}
+              onValueChange={(v: "inactive" | "active") => setForm({ ...form, status: v })}
             >
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="draft">Active</SelectItem>
-                <SelectItem value="published">Inactive</SelectItem>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="inactive">Inactive</SelectItem>
               </SelectContent>
             </Select>
           </div>

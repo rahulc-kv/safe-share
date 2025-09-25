@@ -9,7 +9,7 @@ import { IncidentFilters } from './IncidentFilters';
 import { IncidentTable } from './IncidentTable';
 import { IncidentDetailSheet } from './IncidentDetailSheet';
 import type { Incident, IncidentFilters as IncidentFiltersType } from '../../types';
-import { makeIncident } from '../../utils/helpers';
+// import { makeIncident } from '../../utils/helpers';
 import { USERS, CHANNELS, ENTITIES } from '../../data/mockData';
 import { supabaseApi } from '@/supabase/api';
 
@@ -49,6 +49,7 @@ function transformIncidentData(data: IncidentData): Incident[] {
     const user = item.user; // Assuming first user from array
     const rule = item.rule; // Assuming first rule from array
     const policy = rule.policy; // Assuming first policy from array
+    console.log('====', rule);
     
     // Determine decision based on action
     const decision: "hard_block" | "soft_block" | "nudge" = 

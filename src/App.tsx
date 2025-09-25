@@ -10,11 +10,11 @@ import {
   SettingsPage,
   ReportsPage
 } from './components';
-import { INITIAL_INCIDENTS, INITIAL_POLICIES } from './data/mockData';
+import { INITIAL_POLICIES } from './data/mockData';
 import type { Incident, PolicyData } from './types';
 
 function App() {
-  const [incidents, setIncidents] = useState<Incident[]>(INITIAL_INCIDENTS);
+  const [incidents, setIncidents] = useState<Incident[]>([]);
   const [policies, setPolicies] = useState<PolicyData[]>(INITIAL_POLICIES);
 
   const handleAddIncident = (incident: Incident) => {

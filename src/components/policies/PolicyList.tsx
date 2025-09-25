@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,6 +6,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Copy, Edit, MoreHorizontal, Plus, Trash2 } from 'lucide-react';
 import type { PolicyData } from '../../types';
+import { supabaseApi } from '@/supabase/api';
 
 interface PolicyListProps {
   policies: PolicyData[];
@@ -13,7 +14,46 @@ interface PolicyListProps {
   openEditor: (policy?: PolicyData) => void;
 }
 
-export function PolicyList({ policies, setPolicies, openEditor }: PolicyListProps) {
+export function PolicyList({ openEditor }: PolicyListProps) {
+  const [policies, setPolicies] = useState<PolicyData[]>([]);
+  useEffect(() => {
+    const getInstruments = async () => {
+      const { data } = await supabaseApi.from("policy").select(`
+        id,
+        name,
+        description,
+        is_enabled,
+        version,
+        tags,
+        modes,
+        created_at,
+        prompt
+      `);
+
+      if (data) {
+        // setIncidents(data as unknown as IncidentData);
+        // Transform the data and update allIncidents
+        // const transformedIncidents = transformIncidentData(data as unknown as IncidentData);
+        // setIncidents(transformedIncidents)
+        
+        setPolicies(data.map((item) => {
+          return {
+            id: item.id,
+            name: item.name,
+            description: item.description,
+            status: item.is_enabled ? "active" : "inactive",
+            version: item.version,
+            tags: item.tags,
+            mode: item.modes,
+            prompt: item.prompt
+          }
+        }))
+      }
+
+      console.log(data);
+    };
+    getInstruments();
+  }, []);
   return (
     <Card>
       <CardHeader className="flex justify-between items-start">
@@ -50,8 +90,10 @@ export function PolicyList({ policies, setPolicies, openEditor }: PolicyListProp
                       <Badge key={t} variant="secondary">{t}</Badge>
                     ))}
                   </TableCell>
-                  <TableCell>
-                    <Badge>{p.mode}</Badge>
+                  <TableCell className="space-x-1">
+                  {p.mode.map((m: string) => (
+                    <Badge key={m}>{m}</Badge>
+                  ))}
                   </TableCell>
                   <TableCell>v{p.version}</TableCell>
                   <TableCell className="capitalize">{p.status}</TableCell>
@@ -67,15 +109,15 @@ export function PolicyList({ policies, setPolicies, openEditor }: PolicyListProp
                           <Edit className="mr-2 h-4 w-4" />
                           Edit
                         </DropdownMenuItem>
-                        <DropdownMenuItem 
+                        <DropdownMenuItem
                           onClick={() => navigator.clipboard.writeText(JSON.stringify(p, null, 2))}
                         >
                           <Copy className="mr-2 h-4 w-4" />
                           Copy JSON
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem 
-                          className="text-red-600" 
+                        <DropdownMenuItem
+                          className="text-red-600"
                           onClick={() => setPolicies((list) => list.filter(x => x.id !== p.id))}
                         >
                           <Trash2 className="mr-2 h-4 w-4" />

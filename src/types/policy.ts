@@ -23,30 +23,30 @@ export interface PolicyScope {
 
 export interface PolicyForm {
   name: string;
-  author: string;
+  // author: string;
   tags: string;
-  source_type: "internal" | "external" | "client";
-  source_mapping: string;
+  // source_type: "internal" | "external" | "client";
+  // source_mapping: string;
   description: string;
   prompt: string;
-  mode: "nudge" | "soft" | "hard";
+  mode: string;
   version: string;
-  status: "draft" | "published";
+  status: "active" | "inactive";
 }
 
 export interface PolicyData {
   id: string;
   name: string;
-  author: string;
+  author?: string;
   tags: string[];
-  source_type: "internal" | "external" | "client";
-  source_mapping: string[];
+  source_type?: "internal" | "external" | "client";
+  source_mapping?: string[];
   description: string;
   prompt: string;
-  rule_logic: PolicyRuleLogic;
-  mode: "nudge" | "soft" | "hard";
-  scope: PolicyScope;
-  exceptions: string[];
+  rule_logic?: PolicyRuleLogic;
+  mode: string[];
+  scope?: PolicyScope;
+  exceptions?: string[];
   version: string;
-  status: "draft" | "published";
+  status: "active" | "inactive";
 }
