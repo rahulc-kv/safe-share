@@ -264,26 +264,156 @@ export const SheetTrigger = ({ children, ...props }: any) => (
   <div {...props}>{children}</div>
 )
 
-// Dropdown Menu (simplified)
-export const DropdownMenu = ({ children, ...props }: any) => (
-  <div className="relative" {...props}>{children}</div>
-)
+// Dropdown Menu (with proper state management)
+export const DropdownMenu = ({ children, ...props }: any) => {
+  const [open, setOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+  const triggerRef = useRef<HTMLElement | null>(null)
 
-export const DropdownMenuTrigger = ({ children, asChild, ...props }: any) => (
-  <div {...props}>{children}</div>
-)
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setOpen(false)
+      }
+    }
 
-export const DropdownMenuContent = ({ children, align = "start", className, ...props }: any) => (
-  <div className={cn("z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-lg", className)} {...props}>
-    {children}
-  </div>
-)
+    if (open) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
 
-export const DropdownMenuItem = ({ children, className, ...props }: any) => (
-  <div className={cn("relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground", className)} {...props}>
-    {children}
-  </div>
-)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [open])
+
+  const closeDropdown = () => setOpen(false)
+
+  return (
+    <div className="relative" ref={dropdownRef} {...props}>
+      {React.Children.map(children, (child) => {
+        if (React.isValidElement(child)) {
+          if (child.type === DropdownMenuTrigger) {
+            return React.cloneElement(child as React.ReactElement<any>, { 
+              open,
+              setOpen,
+              triggerRef
+            })
+          }
+          if (child.type === DropdownMenuContent) {
+            return React.cloneElement(child as React.ReactElement<any>, { 
+              open,
+              setOpen,
+              closeDropdown,
+              triggerRef
+            })
+          }
+        }
+        return child
+      })}
+    </div>
+  )
+}
+
+export const DropdownMenuTrigger = ({ children, asChild, open, setOpen, triggerRef, ...props }: any) => {
+  const handleClick = () => {
+    setOpen(!open)
+  }
+
+  if (asChild && React.isValidElement(children)) {
+    return React.cloneElement(children as React.ReactElement<any>, {
+      ...(children.props as any),
+      ref: triggerRef,
+      onClick: (e: any) => {
+        handleClick()
+        ;(children.props as any)?.onClick?.(e)
+      }
+    })
+  }
+
+  return (
+    <div onClick={handleClick} ref={triggerRef} {...props}>
+      {children}
+    </div>
+  )
+}
+
+export const DropdownMenuContent = ({ children, align = "start", className, open, setOpen, closeDropdown, triggerRef, ...props }: any) => {
+  const [position, setPosition] = useState({ top: 0, left: 0 })
+
+  useEffect(() => {
+    if (open && triggerRef?.current) {
+      const rect = triggerRef.current.getBoundingClientRect()
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+      const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft
+      
+      let left = rect.left + scrollLeft
+      let top = rect.bottom + scrollTop + 4 // 4px gap
+      
+      // Adjust for alignment
+      if (align === "end") {
+        left = rect.right + scrollLeft - 128 // 128px is min-w-[8rem]
+      } else if (align === "center") {
+        left = rect.left + scrollLeft + (rect.width / 2) - 64 // 64px is half of min-w-[8rem]
+      }
+      
+      // Ensure dropdown doesn't go off screen
+      const viewportWidth = window.innerWidth
+      const viewportHeight = window.innerHeight
+      
+      if (left + 128 > viewportWidth) {
+        left = viewportWidth - 128 - 8
+      }
+      if (top + 200 > viewportHeight + scrollTop) {
+        top = rect.top + scrollTop - 200 - 4 // Show above instead
+      }
+      
+      setPosition({ top, left })
+    }
+  }, [open, align, triggerRef])
+
+  if (!open) return null
+
+  return (
+    <div 
+      className={cn(
+        "fixed z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-lg",
+        className
+      )}
+      style={{
+        top: `${position.top}px`,
+        left: `${position.left}px`
+      }}
+      {...props}
+    >
+      {React.Children.map(children, (child) => {
+        if (React.isValidElement(child) && child.type === DropdownMenuItem) {
+          return React.cloneElement(child as React.ReactElement<any>, { 
+            closeDropdown
+          })
+        }
+        return child
+      })}
+    </div>
+  )
+}
+
+export const DropdownMenuItem = ({ children, className, onClick, closeDropdown, ...props }: any) => {
+  const handleClick = (e: any) => {
+    onClick?.(e)
+    closeDropdown?.()
+  }
+
+  return (
+    <div 
+      className={cn("relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground", className)} 
+      onClick={handleClick}
+      {...props}
+    >
+      {children}
+    </div>
+  )
+}
 
 export const DropdownMenuSeparator = ({ className, ...props }: any) => (
   <div className={cn("-mx-1 my-1 h-px bg-muted", className)} {...props} />

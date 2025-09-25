@@ -96,7 +96,7 @@ export function PolicyEditorDialog({ open, setOpen, save, initial }: PolicyEdito
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-scroll">
         <DialogHeader>
           <DialogTitle>{initial ? "Edit Policy" : "New Policy"}</DialogTitle>
           <DialogDescription>Define detection logic and enforcement details</DialogDescription>

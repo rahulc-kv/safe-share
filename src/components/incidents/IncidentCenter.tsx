@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -69,7 +70,7 @@ export function IncidentCenter({ allIncidents, setAllIncidents }: IncidentCenter
             <CardTitle className="text-base">Incident Center</CardTitle>
             <CardDescription>Review risky overrides and successful safe‑sends</CardDescription>
           </div>
-          <div className="flex gap-2">
+          {/* <div className="flex gap-2">
             <Button 
               variant="outline" 
               onClick={() => setAllIncidents((prev) => [makeIncident(true, USERS, CHANNELS, ENTITIES), ...prev])}
@@ -84,7 +85,7 @@ export function IncidentCenter({ allIncidents, setAllIncidents }: IncidentCenter
               <CheckCircle2 className="mr-2 h-4 w-4" />
               Simulate Success
             </Button>
-          </div>
+          </div> */}
         </CardHeader>
         <CardContent>
           <div className="mb-4">
