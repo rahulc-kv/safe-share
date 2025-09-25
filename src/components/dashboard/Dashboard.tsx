@@ -1,22 +1,23 @@
-import React, { useMemo } from 'react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { useMemo } from 'react';
+// import { Badge } from '@/components/ui/badge';
+// import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertTriangle, CheckCircle2, Download } from 'lucide-react';
+import { DonutChart } from '@/components/ui/donut-chart';
+// import { AlertTriangle, CheckCircle2, Download } from 'lucide-react';
 import type { Incident } from '../../types';
 
 interface DashboardProps {
   incidents: Incident[];
 }
 
-const ProgressBar = ({ 
-  value, 
-  target, 
-  tone 
-}: { 
-  value: number; 
-  target: number; 
-  tone: 'ok' | 'warn' | 'info' | 'danger' 
+const ProgressBar = ({
+  value,
+  target,
+  tone
+}: {
+  value: number;
+  target: number;
+  tone: 'ok' | 'warn' | 'info' | 'danger'
 }) => {
   const colors = {
     ok: "bg-emerald-500",
@@ -28,8 +29,8 @@ const ProgressBar = ({
   return (
     <div className="space-y-2">
       <div className="h-2 w-full rounded-full bg-muted">
-        <div 
-          className={`h-2 rounded-full ${colors[tone]}`} 
+        <div
+          className={`h-2 rounded-full ${colors[tone]}`}
           style={{ width: `${Math.max(0, Math.min(100, value))}%` }}
         />
       </div>
@@ -47,8 +48,8 @@ const MiniBar = () => {
     <div className="grid h-40 w-full grid-cols-4 items-end gap-3">
       {bars.map((h, i) => (
         <div key={i} className="flex flex-col items-center gap-2">
-          <div 
-            className="w-full rounded-md bg-emerald-500" 
+          <div
+            className="w-full rounded-md bg-emerald-500"
             style={{ height: `${h * 2.2}px` }}
           />
           <div className="text-xs text-muted-foreground">Week {i + 1}</div>
@@ -59,7 +60,7 @@ const MiniBar = () => {
 };
 
 export function Dashboard({ incidents }: DashboardProps) {
-  const { ack, override } = useMemo(() => {
+  const { override } = useMemo(() => {
     const alerts = incidents.filter(i => i.tab === "alert").length;
     const success = incidents.filter(i => i.tab === "success").length;
     const shown = Math.max(1, alerts + success);
@@ -69,29 +70,86 @@ export function Dashboard({ incidents }: DashboardProps) {
     };
   }, [incidents]);
 
-  // Pie chart data
-  const total = 35 + 28 + 22 + 15;
-  const a = (35 / total) * 360;
-  const b = (28 / total) * 360;
-  const c = (22 / total) * 360;
-  const pieBg = `conic-gradient(#ef4444 0 ${a}deg,#f59e0b ${a}deg ${a + b}deg,#3b82f6 ${a + b}deg ${a + b + c}deg,#10b981 ${a + b + c}deg 360deg)`;
+  // Donut chart data for violation types
+  const donutData = {
+    labels: ['PAN Numbers', 'Email Addresses', 'Phone Numbers', 'Aadhaar Numbers'],
+    datasets: [
+      {
+        data: [35, 28, 22, 15],
+        backgroundColor: [
+          '#ef4444', // red-500
+          '#f59e0b', // amber-500
+          '#3b82f6', // blue-500
+          '#10b981', // emerald-500
+        ],
+        borderColor: [
+          '#ef4444',
+          '#f59e0b',
+          '#3b82f6',
+          '#10b981',
+        ],
+        borderWidth: 0,
+      },
+    ],
+  };
+
+  const totalViolations = 35 + 28 + 22 + 15; // Sum of all violation data
+
+  const totalAlertData = {
+    labels: ['High', 'Medium', 'Low'],
+    datasets: [
+      {
+        data: [35, 28, 22],
+        backgroundColor: [
+          '#ef4444', // red-500
+          '#f59e0b', // amber-500
+          '#3b82f6', // blue-500
+        ],
+        borderColor: [
+          '#ef4444',
+          '#f59e0b',
+          '#3b82f6',
+        ],
+        borderWidth: 0,
+      },
+    ],
+  };
+
+  const totalAlerts = 235 + 28 + 22; // Sum of all alert data
 
   return (
     <div className="space-y-4">
       {/* KPI row */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
         <Card>
-          <CardHeader className="gap-1 pb-2">
-            <CardDescription>Nudge Acknowledgement Rate</CardDescription>
-            <CardTitle className="text-3xl">{ack}%</CardTitle>
+          <CardHeader className="gap-1 pb-4">
+            <CardDescription>Total Alerts</CardDescription>
+            <DonutChart
+              data={totalAlertData}
+              centerText={totalAlerts}
+              centerSubtext="Alerts"
+            />
+            <div className='flex flex-row gap-2 text-[14px]'>
+              <div className='bg-muted rounded-md px-2'>
+                <span className='inline-flex h-2 w-2 mr-1 rounded-full bg-[#ef4444]' />
+                High</div>
+                <div className='bg-muted rounded-md px-2'>
+                <span className='inline-flex h-2 w-2 mr-1 rounded-full bg-[#f59e0b]' />
+                Medium</div>
+                <div className='bg-muted rounded-md px-2'>
+                <span className='inline-flex h-2 w-2 mr-1 rounded-full bg-[#3b82f6]' />
+                Low</div>
+            </div>
+            {/* <CardTitle className="text-3xl">{ack}%</CardTitle> */}
           </CardHeader>
-          <CardContent className="pt-0">
+          {/* <CardContent className="pt-0">
             <ProgressBar value={ack} target={80} tone="ok" />
-          </CardContent>
+          </CardContent> */}
         </Card>
         <Card>
           <CardHeader className="gap-1 pb-2">
             <CardDescription>Override Rate</CardDescription>
+            critical/med/low
             <CardTitle className="text-3xl">{override}%</CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
@@ -112,9 +170,9 @@ export function Dashboard({ incidents }: DashboardProps) {
             <CardDescription>Protected Users</CardDescription>
             <CardTitle className="text-3xl">1,247</CardTitle>
           </CardHeader>
-          <CardContent className="pt-0 text-xs text-muted-foreground">
+          {/* <CardContent className="pt-0 text-xs text-muted-foreground">
             Across 3 workspaces
-          </CardContent>
+          </CardContent> */}
         </Card>
       </div>
 
@@ -136,7 +194,11 @@ export function Dashboard({ incidents }: DashboardProps) {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-6">
-              <div className="h-40 w-40 rounded-full" style={{ background: pieBg }} />
+              <DonutChart
+                data={donutData}
+                centerText={totalViolations}
+                centerSubtext="Violations"
+              />
               <div className="space-y-2 text-sm">
                 <div className="flex items-center gap-2">
                   <span className="h-2 w-2 rounded-full bg-red-500" />
@@ -161,7 +223,7 @@ export function Dashboard({ incidents }: DashboardProps) {
       </div>
 
       {/* Recent incidents */}
-      <Card>
+      {/* <Card>
         <CardHeader className="flex items-center justify-between">
           <div>
             <CardTitle className="text-base">Recent Incidents</CardTitle>
@@ -205,7 +267,7 @@ export function Dashboard({ incidents }: DashboardProps) {
             ))}
           </div>
         </CardContent>
-      </Card>
+      </Card> */}
     </div>
   );
 }
