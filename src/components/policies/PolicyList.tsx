@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Copy, Edit, MoreHorizontal, Plus, Trash2 } from 'lucide-react';
+import { Copy, Edit, MoreHorizontal, Trash2 } from 'lucide-react';
 import type { PolicyData } from '../../types';
 import { supabaseApi } from '@/supabase/api';
 
@@ -61,12 +61,12 @@ export function PolicyList({ openEditor }: PolicyListProps) {
           <CardTitle className="text-base">Policies</CardTitle>
           <CardDescription>Create, edit, and organize detection & enforcement rules</CardDescription>
         </div>
-        <div className="flex gap-2 ">
+        {/* <div className="flex gap-2 ">
           <Button variant="outline" onClick={() => openEditor(undefined)}>
             <Plus className="mr-2 h-4 w-4" />
             New Policy
           </Button>
-        </div>
+        </div> */}
       </CardHeader>
       <CardContent>
         <div className="rounded-xl border">

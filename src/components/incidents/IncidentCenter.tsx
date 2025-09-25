@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Download } from 'lucide-react';
 import { HeaderKpis } from '../common';
 import { IncidentFilters } from './IncidentFilters';
 import { IncidentTable } from './IncidentTable';
@@ -12,6 +12,7 @@ import type { Incident, IncidentFilters as IncidentFiltersType } from '../../typ
 // import { makeIncident } from '../../utils/helpers';
 import { USERS, CHANNELS, ENTITIES } from '../../data/mockData';
 import { supabaseApi } from '@/supabase/api';
+import { Icons } from '../layout/Sidebar';
 
 interface IncidentCenterProps {
   allIncidents: Incident[];
@@ -19,28 +20,28 @@ interface IncidentCenterProps {
 }
 
 type IncidentData = {
+  id: string;
+  channel: string;
+  action: string;
+  justification: string;
+  created_at: string;
+  entity_value: string;
+  confidence: number;
+  user: {
     id: string;
-    channel: string;
-    action: string;
-    justification: string;
-    created_at: string;
-    entity_value: string;
-    confidence: number;
-    user: {
-        id: string;
-        name: string;
-        department: string;
+    name: string;
+    department: string;
+  };
+  rule: {
+    id: string;
+    policy: {
+      id: string;
+      name: string;
+      description: string;
     };
-    rule: {
-        id: string;
-        policy: {
-            id: string;
-            name: string;
-            description: string;
-        };
-        severity: string;
-        entity_type: string;
-    };
+    severity: string;
+    entity_type: string;
+  };
 }[]
 
 // Transform function to convert Supabase data to Incident format
@@ -50,21 +51,21 @@ function transformIncidentData(data: IncidentData): Incident[] {
     const rule = item.rule; // Assuming first rule from array
     const policy = rule.policy; // Assuming first policy from array
     console.log('====', rule);
-    
+
     // Determine decision based on action
-    const decision: "hard_block" | "soft_block" | "nudge" = 
+    const decision: "hard_block" | "soft_block" | "nudge" =
       item.action === "block" ? "hard_block" :
-      item.action === "warn" ? "soft_block" : "nudge";
-    
+        item.action === "warn" ? "soft_block" : "nudge";
+
     // Determine tab based on action
-    const tab: "alert" | "success" = 
+    const tab: "alert" | "success" =
       item.action === "allow" ? "success" : "alert";
-    
+
     // Determine user action type
-    const userActionType: "override" | "masked" | "safesend" = 
+    const userActionType: "override" | "masked" | "safesend" =
       item.action === "override" ? "override" :
-      item.action === "masked" ? "masked" : "safesend";
-    
+        item.action === "masked" ? "masked" : "safesend";
+
     return {
       id: item.id,
       time: item.created_at,
@@ -85,7 +86,7 @@ function transformIncidentData(data: IncidentData): Incident[] {
       },
       entities: [{
         type: rule?.entity_type || "unknown",
-        confidence: item.confidence > 50 ? item.confidence <=100 ? item.confidence : 100 : 50 // Default confidence
+        confidence: item.confidence > 50 ? item.confidence <= 100 ? item.confidence : 100 : 50 // Default confidence
       }],
       justification: item.justification, // Mask the entity value
       external_recipients: [], // Default empty array
@@ -115,10 +116,10 @@ function transformIncidentData(data: IncidentData): Incident[] {
 
 export function IncidentCenter({ setAllIncidents }: IncidentCenterProps) {
   const [tab, setTab] = useState("alerts");
-  const [filters, setFilters] = useState<IncidentFiltersType>({ 
-    sev: "all", 
-    entity: "any", 
-    q: "" 
+  const [filters, setFilters] = useState<IncidentFiltersType>({
+    sev: "all",
+    entity: "any",
+    q: ""
   });
   const [open, setOpen] = useState(false);
   const [current, setCurrent] = useState<Incident | null>(null);
@@ -137,15 +138,15 @@ export function IncidentCenter({ setAllIncidents }: IncidentCenterProps) {
         entity_value,
         user:resource_id ( id, name, department ),
         rule:rule_id(id, policy:policy_id ( id, name, description ), severity, entity_type)`
-      );
-      
+      ).order('created_at', { ascending: false });
+
       if (data) {
         // setIncidents(data as unknown as IncidentData);
         // Transform the data and update allIncidents
         const transformedIncidents = transformIncidentData(data as unknown as IncidentData);
         setIncidents(transformedIncidents);
       }
-      
+
       console.log(data);
     };
     getInstruments();
@@ -155,21 +156,21 @@ export function IncidentCenter({ setAllIncidents }: IncidentCenterProps) {
   function filtered(tabKey: string) {
     return incidents
       .filter(i => (tabKey === "alerts" ? i.user_action.type === "override" : i.user_action.type !== "override"))
-      .filter(i => 
-        filters.sev === "all" || 
-        (filters.sev === "high" ? i.severity.toLowerCase() === 'high' : 
-         filters.sev === "med" ? i.severity.toLowerCase() === 'medium' : 
-         i.severity.toLowerCase() === 'low')
+      .filter(i =>
+        filters.sev === "all" ||
+        (filters.sev === "high" ? i.severity.toLowerCase() === 'high' :
+          filters.sev === "med" ? i.severity.toLowerCase() === 'medium' :
+            i.severity.toLowerCase() === 'low')
       )
-      .filter(i => 
-        filters.entity === "any" || 
+      .filter(i =>
+        filters.entity === "any" ||
         i.entities.some(e => e.type === filters.entity)
       )
-      .filter(i => 
-        !filters.q || 
-        (i.user.name.toLowerCase().includes(filters.q.toLowerCase()) || 
-         i.channel.name.toLowerCase().includes(filters.q.toLowerCase()) || 
-         i.justification.toLowerCase().includes(filters.q.toLowerCase()))
+      .filter(i =>
+        !filters.q ||
+        (i.user.name.toLowerCase().includes(filters.q.toLowerCase()) ||
+          i.channel.name.toLowerCase().includes(filters.q.toLowerCase()) ||
+          i.justification.toLowerCase().includes(filters.q.toLowerCase()))
       );
   }
 
@@ -177,15 +178,30 @@ export function IncidentCenter({ setAllIncidents }: IncidentCenterProps) {
   const success = filtered("success");
 
   return (
-    <div className="space-y-4">
-      {/* <HeaderKpis incidents={allIncidents} /> */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0">
-          <div>
-            <CardTitle className="text-base">Incident Center</CardTitle>
-            <CardDescription>Review risky overrides and successful safe‑sends</CardDescription>
-          </div>
-          {/* <div className="flex gap-2">
+    <>
+      <header className="mb-4 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Icons.incidents className="h-5 w-5" />
+          <h1 className="text-xl font-semibold capitalize">
+            Incidents
+          </h1>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="outline">
+            <Download className="mr-2 h-4 w-4" />
+            Export
+          </Button>
+        </div>
+      </header>
+      <div className="space-y-4">
+        {/* <HeaderKpis incidents={allIncidents} /> */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0">
+            <div>
+              <CardTitle className="text-base">Incident Center</CardTitle>
+              <CardDescription>Review risky overrides and successful safe‑sends</CardDescription>
+            </div>
+            {/* <div className="flex gap-2">
             <Button 
               variant="outline" 
               onClick={() => setAllIncidents((prev) => [makeIncident(true, USERS, CHANNELS, ENTITIES), ...prev])}
@@ -201,54 +217,55 @@ export function IncidentCenter({ setAllIncidents }: IncidentCenterProps) {
               Simulate Success
             </Button>
           </div> */}
-        </CardHeader>
-        <CardContent>
-          <div className="mb-4">
-            <IncidentFilters filters={filters} setFilters={setFilters} />
-          </div>
-          <Tabs value={tab} onValueChange={setTab}>
-            <TabsList>
-              <TabsTrigger value="alerts">
-                <AlertTriangle className="mr-2 h-4 w-4" />
-                Overridden Alerts 
-              </TabsTrigger>
-              <TabsTrigger value="success">
-                <CheckCircle2 className="mr-2 h-4 w-4" />
-                Safe‑send Alerts
-              </TabsTrigger>
-            </TabsList>
-            <TabsContent value="alerts" className="mt-4">
-              <IncidentTable 
-                items={alerts} 
-                hideAction={true}
-                onOpen={(i) => { 
-                  setCurrent(i); 
-                  setOpen(true); 
-                }} 
-              />
-            </TabsContent>
-            <TabsContent value="success" className="mt-4">
-              <IncidentTable 
-                items={success} 
-                onOpen={(i) => { 
-                  setCurrent(i); 
-                  setOpen(true); 
-                }} 
-              />
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
-      <IncidentDetailSheet 
-        open={open} 
-        onOpenChange={setOpen} 
-        incident={current} 
-        updateIncident={(fn) =>
-          current && setAllIncidents((list) => 
-            list.map(i => i.id === current.id ? fn(i) : i)
-          )
-        }
-      />
-    </div>
+          </CardHeader>
+          <CardContent>
+            <div className="mb-4">
+              <IncidentFilters filters={filters} setFilters={setFilters} />
+            </div>
+            <Tabs value={tab} onValueChange={setTab}>
+              <TabsList>
+                <TabsTrigger value="alerts">
+                  <AlertTriangle className="mr-2 h-4 w-4" />
+                  Overridden Alerts
+                </TabsTrigger>
+                <TabsTrigger value="success">
+                  <CheckCircle2 className="mr-2 h-4 w-4" />
+                  Safe‑send Alerts
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="alerts" className="mt-4">
+                <IncidentTable
+                  items={alerts}
+                  hideAction={true}
+                  onOpen={(i) => {
+                    setCurrent(i);
+                    setOpen(true);
+                  }}
+                />
+              </TabsContent>
+              <TabsContent value="success" className="mt-4">
+                <IncidentTable
+                  items={success}
+                  onOpen={(i) => {
+                    setCurrent(i);
+                    setOpen(true);
+                  }}
+                />
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+        <IncidentDetailSheet
+          open={open}
+          onOpenChange={setOpen}
+          incident={current}
+          updateIncident={(fn) =>
+            current && setAllIncidents((list) =>
+              list.map(i => i.id === current.id ? fn(i) : i)
+            )
+          }
+        />
+      </div>
+    </>
   );
 }

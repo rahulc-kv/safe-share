@@ -15,7 +15,8 @@ interface IncidentFiltersProps {
 
 export function IncidentFilters({ filters, setFilters }: IncidentFiltersProps) {
   return (
-    <div className="flex flex-wrap items-end gap-3">
+    <div className="flex flex-wrap items-end gap-3 justify-between">
+      <div className="flex flex-wrap items-end gap-3">
       <div className="w-40">
         <Label className="mb-1 block">Severity</Label>
         <Select 
@@ -65,6 +66,7 @@ export function IncidentFilters({ filters, setFilters }: IncidentFiltersProps) {
           value={filters.q} 
           onChange={(e) => setFilters((f) => ({ ...f, q: e.target.value }))} 
         />
+      </div>
       </div>
       <Button 
         variant="outline" 
