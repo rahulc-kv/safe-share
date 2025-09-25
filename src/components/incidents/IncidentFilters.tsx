@@ -61,7 +61,7 @@ export function IncidentFilters({ filters, setFilters }: IncidentFiltersProps) {
       <div className="w-56">
         <Label className="mb-1 block">Search</Label>
         <Input 
-          placeholder="User, channel, snippet…" 
+          placeholder="User, channel, policy" 
           value={filters.q} 
           onChange={(e) => setFilters((f) => ({ ...f, q: e.target.value }))} 
         />

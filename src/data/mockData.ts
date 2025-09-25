@@ -25,9 +25,9 @@ export const ENTITIES: Entity[] = [
 export const INITIAL_POLICIES: PolicyData[] = [
   { 
     id: "pol_7", 
-    name: "PAN & Secrets Coaching", 
+    name: "PII", 
     author: "Security Research", 
-    tags: ["PII", "Secrets", "Internal"], 
+    tags: ["PAN", "Aadhar", "Internal"], 
     source_type: "internal", 
     source_mapping: ["DPDP §8"], 
     description: "Detect Indian PAN and cloud secrets.", 
@@ -44,7 +44,26 @@ export const INITIAL_POLICIES: PolicyData[] = [
   },
   { 
     id: "pol_2", 
-    name: "Aadhaar Coaching", 
+    name: "CII", 
+    author: "Compliance", 
+    tags: ["PII", "External"], 
+    source_type: "external", 
+    source_mapping: ["DPDP §8"], 
+    description: "Detect Aadhaar numbers", 
+    prompt: "Identify Aadhaar sequences in Indian formats", 
+    rule_logic: { 
+      entities: [{ type: "Aadhaar" }], 
+      thresholds: { severity: { nudge: 20, soft: 50, hard: 75 } }
+    }, 
+    mode: "nudge", 
+    scope: { users: ["*"], groups: ["Sales"], apps: ["*"] }, 
+    exceptions: [], 
+    version: "1.0.3", 
+    status: "published" 
+  },
+  { 
+    id: "pol_2", 
+    name: "DPDP", 
     author: "Compliance", 
     tags: ["PII", "External"], 
     source_type: "external", 

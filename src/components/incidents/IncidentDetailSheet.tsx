@@ -89,7 +89,7 @@ export function IncidentDetailSheet({
               <EntityPills entities={incident.entities} />
               <div className="rounded-md border p-3 text-sm bg-muted/30">
                 <div className="mb-1 text-xs text-muted-foreground">Snippet (masked)</div>
-                <div className="font-mono">{incident.snippet_masked}</div>
+                <div className="font-mono">{incident.justification}</div>
               </div>
             </CardContent>
           </Card>

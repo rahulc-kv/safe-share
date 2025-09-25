@@ -107,26 +107,26 @@ export function PolicyEditorDialog({ open, setOpen, save, initial }: PolicyEdito
             <Input 
               value={form.name} 
               onChange={(e) => setForm({ ...form, name: e.target.value })} 
-              placeholder="PAN & Secrets Coaching"
+              placeholder="Policy name"
             />
           </div>
-          <div className="space-y-2">
+          {/* <div className="space-y-2">
             <Label>Author / Researcher</Label>
             <Input 
               value={form.author} 
               onChange={(e) => setForm({ ...form, author: e.target.value })} 
               placeholder="Security Research"
             />
-          </div>
+          </div> */}
           <div className="space-y-2">
-            <Label>Tags (comma‑sep)</Label>
+            <Label>Entities (comma‑sep)</Label>
             <Input 
               value={form.tags} 
               onChange={(e) => setForm({ ...form, tags: e.target.value })} 
-              placeholder="PII, Secrets, Internal"
+              placeholder="Salary breakup, Increments, Hiring budget..."
             />
           </div>
-          <div className="space-y-2">
+          {/* <div className="space-y-2">
             <Label>Source Type</Label>
             <Select 
               value={form.source_type} 
@@ -139,15 +139,15 @@ export function PolicyEditorDialog({ open, setOpen, save, initial }: PolicyEdito
                 <SelectItem value="client">Client agreement</SelectItem>
               </SelectContent>
             </Select>
-          </div>
-          <div className="space-y-2 sm:col-span-2">
+          </div> */}
+          {/* <div className="space-y-2 sm:col-span-2">
             <Label>Source Mapping (comma‑sep)</Label>
             <Input 
               value={form.source_mapping} 
               onChange={(e) => setForm({ ...form, source_mapping: e.target.value })} 
               placeholder="DPDP §8, Client MSA 4.2"
             />
-          </div>
+          </div> */}
           <div className="space-y-2 sm:col-span-2">
             <Label>Description</Label>
             <Textarea 
@@ -172,11 +172,12 @@ export function PolicyEditorDialog({ open, setOpen, save, initial }: PolicyEdito
               value={form.mode} 
               onValueChange={(v: "nudge" | "soft" | "hard") => setForm({ ...form, mode: v })}
             >
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger><SelectValue/></SelectTrigger>
               <SelectContent>
-                <SelectItem value="nudge">Nudge</SelectItem>
-                <SelectItem value="soft">Soft block</SelectItem>
-                <SelectItem value="hard">Hard block</SelectItem>
+                {/* <SelectItem value="nudge">Nudge</SelectItem> */}
+                <SelectItem value="soft">Masked</SelectItem>
+                <SelectItem value="hard">Override</SelectItem>
+                <SelectItem value="hard">Safe-send</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -188,8 +189,8 @@ export function PolicyEditorDialog({ open, setOpen, save, initial }: PolicyEdito
             >
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="draft">Draft</SelectItem>
-                <SelectItem value="published">Published</SelectItem>
+                <SelectItem value="draft">Active</SelectItem>
+                <SelectItem value="published">Inactive</SelectItem>
               </SelectContent>
             </Select>
           </div>

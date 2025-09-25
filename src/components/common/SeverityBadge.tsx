@@ -2,14 +2,14 @@ import React from 'react';
 import { Badge } from '@/components/ui/badge';
 
 interface SeverityBadgeProps {
-  value: number;
+  value: string;
 }
 
 export function SeverityBadge({ value }: SeverityBadgeProps) {
-  if (value > 80) {
+  if (value.toLowerCase() === 'high') {
     return <Badge variant="destructive">High</Badge>;
   }
-  if (value > 50) {
+  if (value.toLowerCase() === 'medium') {
     return <Badge>Medium</Badge>;
   }
   return <Badge variant="secondary">Low</Badge>;

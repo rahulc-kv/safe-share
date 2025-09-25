@@ -1,4 +1,5 @@
-import  { useState } from 'react';
+import { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import {
   AppLayout,
   Dashboard,
@@ -13,7 +14,6 @@ import { INITIAL_INCIDENTS, INITIAL_POLICIES } from './data/mockData';
 import type { Incident, PolicyData } from './types';
 
 function App() {
-  const [route, setRoute] = useState("incidents");
   const [incidents, setIncidents] = useState<Incident[]>(INITIAL_INCIDENTS);
   const [policies, setPolicies] = useState<PolicyData[]>(INITIAL_POLICIES);
 
@@ -21,45 +21,40 @@ function App() {
     setIncidents(prev => [incident, ...prev]);
   };
 
-  const renderContent = () => {
-    switch (route) {
-      case "dashboard":
-        return <Dashboard incidents={incidents} />;
-      case "incidents":
-        return (
-          <IncidentCenter 
-            allIncidents={incidents} 
-            setAllIncidents={setIncidents} 
-          />
-        );
-      case "policies":
-        return (
-          <PolicyStudio 
-            policies={policies} 
-            setPolicies={setPolicies} 
-          />
-        );
-      case "users":
-        return <UsersEndpoints />;
-      case "reports":
-        return <ReportsPage />;
-      case "audit":
-        return <AuditLog />;
-      case "settings":
-        return <SettingsPage />;
-      default:
-        return <IncidentCenter allIncidents={incidents} setAllIncidents={setIncidents} />;
-    }
-  };
-
   return (
-    <AppLayout
-      currentRoute={route}
-      onRouteChange={setRoute}
-      onAddIncident={handleAddIncident}
-    >
-      {renderContent()}
-    </AppLayout>
+    <Router>
+      <AppLayout onAddIncident={handleAddIncident}>
+        <Routes>
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route 
+            path="/dashboard" 
+            element={<Dashboard incidents={incidents} />} 
+          />
+          <Route 
+            path="/incidents" 
+            element={
+              <IncidentCenter 
+                allIncidents={incidents} 
+                setAllIncidents={setIncidents} 
+              />
+            } 
+          />
+          <Route 
+            path="/policies" 
+            element={
+              <PolicyStudio 
+                policies={policies} 
+                setPolicies={setPolicies} 
+              />
+            } 
+          />
+          <Route path="/users" element={<UsersEndpoints />} />
+          <Route path="/reports" element={<ReportsPage />} />
+          <Route path="/audit" element={<AuditLog />} />
+          <Route path="/settings" element={<SettingsPage />} />
+        </Routes>
+      </AppLayout>
+    </Router>
   );
 }
 

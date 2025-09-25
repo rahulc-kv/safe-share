@@ -1,35 +1,38 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { AlertTriangle, CheckCircle2, BarChart3, Bell, Layers, Users2, FileText, History, Settings } from 'lucide-react';
+import { BarChart3, Bell, Layers, Users2, FileText, History, Settings } from 'lucide-react';
 import { cn } from '../../utils/cn';
-import { makeIncident } from '../../utils/helpers';
-import { USERS, CHANNELS, ENTITIES } from '../../data/mockData';
-import type { Incident } from '../../types';
 
-interface SidebarProps {
-  currentRoute: string;
-  onRouteChange: (route: string) => void;
-  onAddIncident: (incident: Incident) => void;
+// eslint-disable-next-line react-refresh/only-export-components
+export const Icons = {
+  dashboard: BarChart3,
+  incidents: Bell,
+  policies: Layers,
+  settings: Settings,
 }
 
 const NAV_ITEMS = [
-  { key: "dashboard", label: "Dashboard", icon: BarChart3 },
-  { key: "incidents", label: "Incident Center", icon: Bell },
-  { key: "policies", label: "Policy Studio", icon: Layers },
-  { key: "users", label: "Users & Endpoints", icon: Users2 },
-  { key: "reports", label: "Reports & Exports", icon: FileText },
-  { key: "audit", label: "Audit", icon: History },
-  { key: "settings", label: "Settings", icon: Settings },
+  { key: "dashboard", label: "Dashboard", icon: BarChart3, path: "/dashboard" },
+  { key: "incidents", label: "Incident Center", icon: Bell, path: "/incidents" },
+  { key: "policies", label: "Policy Studio", icon: Layers, path: "/policies" },
+  // { key: "users", label: "Users & Endpoints", icon: Users2, path: "/users" },
+  // { key: "reports", label: "Reports & Exports", icon: FileText, path: "/reports" },
+  // { key: "audit", label: "Audit", icon: History, path: "/audit" },
+  { key: "settings", label: "Settings", icon: Settings, path: "/settings" },
 ];
 
-export function Sidebar({ currentRoute, onRouteChange, onAddIncident }: SidebarProps) {
+export function Sidebar() {
+  const location = useLocation();
+  const currentRoute = location.pathname.substring(1) || 'incidents';
+
   return (
     <aside className="sticky top-0 hidden h-screen w-64 flex-shrink-0 border-r p-4 md:block">
       <div className="mb-6 flex items-center justify-between">
         <div className="text-lg font-bold tracking-tight">safeshare.ai</div>
-        <Badge variant="secondary">Admin</Badge>
+        {/* <Badge variant="secondary">Admin</Badge> */}
       </div>
       <nav className="space-y-1">
         {NAV_ITEMS.map((n) => {
@@ -43,16 +46,18 @@ export function Sidebar({ currentRoute, onRouteChange, onAddIncident }: SidebarP
                 "w-full justify-start",
                 active ? "" : "hover:bg-muted"
               )}
-              onClick={() => onRouteChange(n.key)}
+              asChild
             >
-              <Icon className="mr-2 h-4 w-4" />
-              {n.label}
+              <Link to={n.path}>
+                <Icon className="mr-2 h-4 w-4" />
+                {n.label}
+              </Link>
             </Button>
           );
         })}
       </nav>
-      <Separator className="my-4" />
-      <div className="space-y-2">
+      {/* <Separator className="my-4" /> */}
+      {/* <div className="space-y-2">
         <div className="text-xs uppercase text-muted-foreground">Preview</div>
         <div className="flex gap-2">
           <Button
@@ -72,7 +77,7 @@ export function Sidebar({ currentRoute, onRouteChange, onAddIncident }: SidebarP
             Success
           </Button>
         </div>
-      </div>
+      </div> */}
     </aside>
   );
 }

@@ -18,7 +18,7 @@ export interface Policy {
 }
 
 export interface UserAction {
-  type: "override" | "mask" | "delete";
+  type: "override" | "masked" | "safesend";
   reason?: "business_need" | "false_positive" | "approved_exception";
   text?: string;
 }
@@ -26,13 +26,13 @@ export interface UserAction {
 export interface Incident {
   id: string;
   time: string;
-  severity: number;
+  severity: string;
   decision: "hard_block" | "soft_block" | "nudge";
   tab: "alert" | "success";
   channel: Channel;
   user: User;
   entities: Entity[];
-  snippet_masked: string;
+  justification: string;
   external_recipients: string[];
   policy: Policy;
   user_action: UserAction;

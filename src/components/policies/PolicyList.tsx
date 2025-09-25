@@ -16,12 +16,12 @@ interface PolicyListProps {
 export function PolicyList({ policies, setPolicies, openEditor }: PolicyListProps) {
   return (
     <Card>
-      <CardHeader className="flex items-center justify-between">
+      <CardHeader className="flex justify-between items-start">
         <div>
           <CardTitle className="text-base">Policies</CardTitle>
           <CardDescription>Create, edit, and organize detection & enforcement rules</CardDescription>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 ">
           <Button variant="outline" onClick={() => openEditor(undefined)}>
             <Plus className="mr-2 h-4 w-4" />
             New Policy
@@ -33,7 +33,7 @@ export function PolicyList({ policies, setPolicies, openEditor }: PolicyListProp
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
+                <TableHead>Policy Name</TableHead>
                 <TableHead>Tags</TableHead>
                 <TableHead>Mode</TableHead>
                 <TableHead>Version</TableHead>
@@ -59,7 +59,7 @@ export function PolicyList({ policies, setPolicies, openEditor }: PolicyListProp
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon">
-                          <MoreHorizontal className="h-4 w-4" />
+                          <MoreHorizontal className="h-4 w-4 rotate-90" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">

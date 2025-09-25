@@ -17,7 +17,7 @@ export function EntityPills({ entities }: EntityPillsProps) {
             "secondary"
           }
         >
-          {e.type} {Math.round(e.confidence * 100)}%
+          {e.type} {Math.round(e.confidence)}%
         </Badge>
       ))}
     </div>

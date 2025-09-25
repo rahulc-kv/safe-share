@@ -6,30 +6,32 @@ import type { Incident } from '../../types';
 
 interface IncidentTableProps {
   items: Incident[];
+  hideAction?: boolean;
   onOpen: (incident: Incident) => void;
 }
 
-export function IncidentTable({ items, onOpen }: IncidentTableProps) {
+export function IncidentTable({ items, onOpen, hideAction = false }: IncidentTableProps) {
   return (
     <div className="rounded-xl border">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Time</TableHead>
+            <TableHead>Alert ID</TableHead>
             <TableHead>Severity</TableHead>
-            <TableHead>Entities</TableHead>
-            <TableHead>Channel/App</TableHead>
-            <TableHead>User</TableHead>
-            <TableHead>Action</TableHead>
-            <TableHead>Policy</TableHead>
-            <TableHead>Snippet</TableHead>
+            <TableHead>Entities(Confidence%)</TableHead>
+            <TableHead>Employee</TableHead>
+            <TableHead>Channel</TableHead>
+            {!hideAction && <TableHead>Action</TableHead>}
+            <TableHead>Policy violated</TableHead>
+            <TableHead>Created Time</TableHead>
+            <TableHead>Justification</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {items.map((i) => (
             <TableRow key={i.id} className="cursor-pointer" onClick={() => onOpen(i)}>
               <TableCell className="whitespace-nowrap text-xs text-muted-foreground">
-                {new Date(i.time).toLocaleString()}
+                {`INC-${i.id.slice(i.id.length-4)}`}
               </TableCell>
               <TableCell>
                 <SeverityBadge value={i.severity} />
@@ -37,29 +39,33 @@ export function IncidentTable({ items, onOpen }: IncidentTableProps) {
               <TableCell>
                 <EntityPills entities={i.entities} />
               </TableCell>
-              <TableCell className="text-sm">
-                {i.channel.type} {i.channel.name} 
-                <span className="text-muted-foreground"> · {i.channel.app}</span>
+
+              <TableCell className="text-sm truncate max-w-[200px]">
+                {i.user.name}
+                {/* <span className="text-muted-foreground"> · {i.user.dept}</span> */}
               </TableCell>
               <TableCell className="text-sm">
-                {i.user.name} 
-                <span className="text-muted-foreground"> · {i.user.dept}</span>
+                {i.channel.name}
+                {/* <span className="text-muted-foreground"> · {i.channel.app}</span> */}
               </TableCell>
-              <TableCell className="text-sm">
+              {!hideAction && <TableCell className="text-sm min-w-[110px]">
                 {i.user_action.type === "override" ? (
                   <Badge variant="destructive">Override</Badge>
-                ) : i.user_action.type === "mask" ? (
+                ) : i.user_action.type === "masked" ? (
                   <Badge>Masked</Badge>
                 ) : (
-                  <Badge variant="secondary">Deleted</Badge>
+                  <Badge variant="secondary">SafeSend</Badge>
                 )}
+              </TableCell>}
+              <TableCell className="text-sm truncate max-w-[200px]">
+                {i.policy.name}
+                {/* <span className="text-muted-foreground"> v{i.policy.version}</span> */}
               </TableCell>
-              <TableCell className="text-sm">
-                {i.policy.name} 
-                <span className="text-muted-foreground"> v{i.policy.version}</span>
+              <TableCell className="whitespace-nowrap text-xs">
+                {new Date(i.time).toLocaleString()}
               </TableCell>
-              <TableCell className="max-w-[360px] truncate text-sm">
-                {i.snippet_masked}
+              <TableCell className="max-w-[200px] truncate text-sm">
+                {i.justification}
               </TableCell>
             </TableRow>
           ))}

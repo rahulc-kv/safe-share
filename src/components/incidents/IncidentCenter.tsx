@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -18,8 +18,101 @@ interface IncidentCenterProps {
   setAllIncidents: React.Dispatch<React.SetStateAction<Incident[]>>;
 }
 
+type IncidentData = {
+    id: string;
+    channel: string;
+    action: string;
+    justification: string;
+    created_at: string;
+    entity_value: string;
+    confidence: number;
+    user: {
+        id: string;
+        name: string;
+        department: string;
+    };
+    rule: {
+        id: string;
+        policy: {
+            id: string;
+            name: string;
+            description: string;
+        };
+        severity: string;
+        entity_type: string;
+    };
+}[]
 
-export function IncidentCenter({ allIncidents, setAllIncidents }: IncidentCenterProps) {
+// Transform function to convert Supabase data to Incident format
+function transformIncidentData(data: IncidentData): Incident[] {
+  return data.map(item => {
+    const user = item.user; // Assuming first user from array
+    const rule = item.rule; // Assuming first rule from array
+    const policy = rule.policy; // Assuming first policy from array
+    
+    // Determine decision based on action
+    const decision: "hard_block" | "soft_block" | "nudge" = 
+      item.action === "block" ? "hard_block" :
+      item.action === "warn" ? "soft_block" : "nudge";
+    
+    // Determine tab based on action
+    const tab: "alert" | "success" = 
+      item.action === "allow" ? "success" : "alert";
+    
+    // Determine user action type
+    const userActionType: "override" | "masked" | "safesend" = 
+      item.action === "override" ? "override" :
+      item.action === "masked" ? "masked" : "safesend";
+    
+    return {
+      id: item.id,
+      time: item.created_at,
+      severity: rule.severity,
+      decision: decision,
+      tab: tab,
+      channel: {
+        type: "email", // Default type, could be derived from channel field
+        name: item.channel,
+        app: "outlook" // Default app, could be derived from channel field
+      },
+      user: {
+        id: user?.id || "",
+        name: user?.name || "",
+        email: `${user?.name?.toLowerCase().replace(/\s+/g, '.')}@company.com`, // Generate email
+        dept: user?.department || "",
+        manager: "Unknown" // Default manager
+      },
+      entities: [{
+        type: rule?.entity_type || "unknown",
+        confidence: item.confidence > 50 ? item.confidence <=100 ? item.confidence : 100 : 50 // Default confidence
+      }],
+      justification: item.justification, // Mask the entity value
+      external_recipients: [], // Default empty array
+      policy: {
+        id: policy.id,
+        name: policy.name,
+        version: "1.0" // Default version
+      },
+      user_action: {
+        type: userActionType,
+        reason: item.justification ? "business_need" : undefined,
+        text: item.justification
+      },
+      status: "open" as const,
+      assignee: null,
+      endpoint: {
+        host: "unknown-host",
+        os: "unknown",
+        agent: "unknown",
+        last_seen: item.created_at
+      }
+    };
+  });
+}
+
+
+
+export function IncidentCenter({ setAllIncidents }: IncidentCenterProps) {
   const [tab, setTab] = useState("alerts");
   const [filters, setFilters] = useState<IncidentFiltersType>({ 
     sev: "all", 
@@ -28,23 +121,44 @@ export function IncidentCenter({ allIncidents, setAllIncidents }: IncidentCenter
   });
   const [open, setOpen] = useState(false);
   const [current, setCurrent] = useState<Incident | null>(null);
+  const [incidents, setIncidents] = useState<Incident[]>([]);
+
 
   useEffect(() => {
+    const getInstruments = async () => {
+      const { data } = await supabaseApi.from("incident").select(`
+        id,
+        channel,
+        action,
+        justification,
+        created_at,
+        confidence,
+        entity_value,
+        user:resource_id ( id, name, department ),
+        rule:rule_id(id, policy:policy_id ( id, name, description ), severity, entity_type)`
+      );
+      
+      if (data) {
+        // setIncidents(data as unknown as IncidentData);
+        // Transform the data and update allIncidents
+        const transformedIncidents = transformIncidentData(data as unknown as IncidentData);
+        setIncidents(transformedIncidents);
+      }
+      
+      console.log(data);
+    };
     getInstruments();
   }, []);
-  async function getInstruments() {
-    const { data } = await supabaseApi.from("resource").select();
-  console.log(data);
-  }
+
 
   function filtered(tabKey: string) {
-    return allIncidents
+    return incidents
       .filter(i => (tabKey === "alerts" ? i.user_action.type === "override" : i.user_action.type !== "override"))
       .filter(i => 
         filters.sev === "all" || 
-        (filters.sev === "high" ? i.severity > 80 : 
-         filters.sev === "med" ? i.severity > 50 && i.severity <= 80 : 
-         i.severity <= 50)
+        (filters.sev === "high" ? i.severity.toLowerCase() === 'high' : 
+         filters.sev === "med" ? i.severity.toLowerCase() === 'medium' : 
+         i.severity.toLowerCase() === 'low')
       )
       .filter(i => 
         filters.entity === "any" || 
@@ -54,7 +168,7 @@ export function IncidentCenter({ allIncidents, setAllIncidents }: IncidentCenter
         !filters.q || 
         (i.user.name.toLowerCase().includes(filters.q.toLowerCase()) || 
          i.channel.name.toLowerCase().includes(filters.q.toLowerCase()) || 
-         i.snippet_masked.toLowerCase().includes(filters.q.toLowerCase()))
+         i.justification.toLowerCase().includes(filters.q.toLowerCase()))
       );
   }
 
@@ -63,7 +177,7 @@ export function IncidentCenter({ allIncidents, setAllIncidents }: IncidentCenter
 
   return (
     <div className="space-y-4">
-      <HeaderKpis incidents={allIncidents} />
+      {/* <HeaderKpis incidents={allIncidents} /> */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0">
           <div>
@@ -95,16 +209,17 @@ export function IncidentCenter({ allIncidents, setAllIncidents }: IncidentCenter
             <TabsList>
               <TabsTrigger value="alerts">
                 <AlertTriangle className="mr-2 h-4 w-4" />
-                Alerts (Overrides)
+                Overridden Alerts 
               </TabsTrigger>
               <TabsTrigger value="success">
                 <CheckCircle2 className="mr-2 h-4 w-4" />
-                Success (Safe‑sends)
+                Safe‑send Alerts
               </TabsTrigger>
             </TabsList>
             <TabsContent value="alerts" className="mt-4">
               <IncidentTable 
                 items={alerts} 
+                hideAction={true}
                 onOpen={(i) => { 
                   setCurrent(i); 
                   setOpen(true); 
