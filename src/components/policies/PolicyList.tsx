@@ -14,46 +14,7 @@ interface PolicyListProps {
   openEditor: (policy?: PolicyData) => void;
 }
 
-export function PolicyList({ openEditor }: PolicyListProps) {
-  const [policies, setPolicies] = useState<PolicyData[]>([]);
-  useEffect(() => {
-    const getInstruments = async () => {
-      const { data } = await supabaseApi.from("policy").select(`
-        id,
-        name,
-        description,
-        is_enabled,
-        version,
-        tags,
-        modes,
-        created_at,
-        prompt
-      `);
-
-      if (data) {
-        // setIncidents(data as unknown as IncidentData);
-        // Transform the data and update allIncidents
-        // const transformedIncidents = transformIncidentData(data as unknown as IncidentData);
-        // setIncidents(transformedIncidents)
-        
-        setPolicies(data.map((item) => {
-          return {
-            id: item.id,
-            name: item.name,
-            description: item.description,
-            status: item.is_enabled ? "active" : "inactive",
-            version: item.version,
-            tags: item.tags,
-            mode: item.modes,
-            prompt: item.prompt
-          }
-        }))
-      }
-
-      console.log(data);
-    };
-    getInstruments();
-  }, []);
+export function PolicyList({ openEditor, policies, setPolicies }: PolicyListProps) {
   return (
     <Card>
       <CardHeader className="flex justify-between items-start">

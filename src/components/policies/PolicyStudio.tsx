@@ -1,35 +1,88 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { PolicyList } from './PolicyList';
 import { PolicyEditorDialog } from './PolicyEditorDialog';
 import type { PolicyData } from '../../types';
 import { Icons } from '../layout/Sidebar';
 import { Button } from '../ui/button';
 import { Download, Plus } from 'lucide-react';
+import { supabaseApi } from '@/supabase/api';
 
 interface PolicyStudioProps {
   policies: PolicyData[];
   setPolicies: React.Dispatch<React.SetStateAction<PolicyData[]>>;
 }
 
-export function PolicyStudio({ policies, setPolicies }: PolicyStudioProps) {
+export function PolicyStudio({ }: PolicyStudioProps) {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<PolicyData | null>(null);
+  const [policies, setPolicies] = useState<PolicyData[]>([]);
 
   function openEditor(policy?: PolicyData) {
     setEditing(policy || null);
     setOpen(true);
   }
 
-  function savePolicy(policy: PolicyData) {
-    setPolicies((list) => {
-      const idx = list.findIndex(x => x.id === policy.id);
-      if (idx >= 0) {
-        const copy = [...list];
-        copy[idx] = policy;
-        return copy;
-      }
-      return [policy, ...list];
+  const getInstruments = async () => {
+    const { data } = await supabaseApi.from("policy").select(`
+      id,
+      name,
+      description,
+      is_enabled,
+      version,
+      tags,
+      modes,
+      created_at,
+      prompt
+    `);
+
+    if (data) {
+      // setIncidents(data as unknown as IncidentData);
+      // Transform the data and update allIncidents
+      // const transformedIncidents = transformIncidentData(data as unknown as IncidentData);
+      // setIncidents(transformedIncidents)
+      
+      setPolicies(data.map((item) => {
+        return {
+          id: item.id,
+          name: item.name,
+          description: item.description,
+          status: item.is_enabled ? "active" : "inactive",
+          version: item.version,
+          tags: item.tags,
+          mode: item.modes,
+          prompt: item.prompt
+        }
+      }))
+    }
+
+    console.log(data);
+  };
+
+  useEffect(() => {
+    getInstruments();
+  }, []);
+
+  async function savePolicy(policy: PolicyData) {
+    // setPolicies((list) => {
+    //   const idx = list.findIndex(x => x.id === policy.id);
+    //   if (idx >= 0) {
+    //     const copy = [...list];
+    //     copy[idx] = policy;
+    //     return copy;
+    //   }
+    //   return [policy, ...list];
+    // });
+    await supabaseApi.from("policy").upsert({
+      id: policy.id,
+      name: policy.name,
+      description: policy.description,
+      is_enabled: policy.status === "active",
+      version: policy.version,
+      tags: policy.tags,
+      modes: policy.mode,
+      prompt: policy.prompt
     });
+    getInstruments();
   }
 
   return (
