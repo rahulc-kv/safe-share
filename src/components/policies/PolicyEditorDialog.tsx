@@ -9,7 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Save, ChevronDown, X } from 'lucide-react';
 import type { PolicyData, PolicyForm } from '../../types';
-import { randId } from '../../utils/helpers';
+// import { randId } from '../../utils/helpers';
 import { cn } from '@/lib/utils';
 
 interface PolicyEditorDialogProps {
@@ -173,7 +173,7 @@ export function PolicyEditorDialog({ open, setOpen, save, initial }: PolicyEdito
           severity: { 
             override: 30, 
             mask: 60, 
-            delete: 80 
+            stopped: 80 
           } 
         } 
       },
@@ -270,7 +270,7 @@ export function PolicyEditorDialog({ open, setOpen, save, initial }: PolicyEdito
               options={[
                 { value: "override", label: "Override" },
                 { value: "mask", label: "Mask" },
-                { value: "delete", label: "Delete" }
+                { value: "stopped", label: "Stopped" }
               ]}
               placeholder="Select modes..."
             />

@@ -6,7 +6,7 @@ export interface PolicyThresholds {
   severity: {
     override: number;
     mask: number;
-    delete: number;
+    stopped: number;
   };
 }
 

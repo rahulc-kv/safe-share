@@ -18,7 +18,7 @@ export interface Policy {
 }
 
 export interface UserAction {
-  type: "override" | "masked" | "safesend";
+  type: "override" | "masked" | "stopped";
   reason?: "business_need" | "false_positive" | "approved_exception";
   text?: string;
 }
@@ -27,7 +27,7 @@ export interface Incident {
   id: string;
   time: string;
   severity: string;
-  decision: "delete" | "mask" | "override";
+  decision: "stopped" | "mask" | "override";
   tab: "alert" | "success";
   channel: Channel;
   user: User;

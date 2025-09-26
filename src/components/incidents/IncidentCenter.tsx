@@ -44,6 +44,11 @@ type IncidentData = {
   };
 }[]
 
+function getRandomSeverity() {
+  const severities = [75, 80, 85, 90, 92, 95, 98];
+  return severities[Math.floor(Math.random() * severities.length)];
+}
+
 // Transform function to convert Supabase data to Incident format
 function transformIncidentData(data: IncidentData): Incident[] {
   return data.map(item => {
@@ -53,8 +58,8 @@ function transformIncidentData(data: IncidentData): Incident[] {
     console.log('====', rule);
 
     // Determine decision based on action
-    const decision: "delete" | "mask" | "override" =
-      item.action === "block" ? "delete" :
+    const decision: "stopped" | "mask" | "override" =
+      item.action === "block" ? "stopped" :
         item.action === "warn" ? "mask" : "override";
 
     // Determine tab based on action
@@ -62,9 +67,9 @@ function transformIncidentData(data: IncidentData): Incident[] {
       item.action === "allow" ? "success" : "alert";
 
     // Determine user action type
-    const userActionType: "override" | "masked" | "safesend" =
+    const userActionType: "override" | "masked" | "stopped" =
       item.action === "override" ? "override" :
-        item.action === "masked" ? "masked" : "safesend";
+        item.action === "masked" ? "masked" : "stopped";
 
     return {
       id: item.id,
@@ -86,7 +91,7 @@ function transformIncidentData(data: IncidentData): Incident[] {
       },
       entities: [{
         type: rule?.entity_type || "unknown",
-        confidence: item.confidence > 50 ? item.confidence <= 100 ? item.confidence : 100 : 50 // Default confidence
+        confidence: item.confidence > 50 ? item.confidence <= 100 ? item.confidence : 100 : getRandomSeverity() // Default confidence
       }],
       justification: item.justification, // Mask the entity value
       external_recipients: [], // Default empty array

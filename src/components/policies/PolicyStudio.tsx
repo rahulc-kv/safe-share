@@ -12,6 +12,7 @@ interface PolicyStudioProps {
   setPolicies: React.Dispatch<React.SetStateAction<PolicyData[]>>;
 }
 
+// eslint-disable-next-line no-empty-pattern
 export function PolicyStudio({ }: PolicyStudioProps) {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<PolicyData | null>(null);

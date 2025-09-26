@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useMemo } from 'react';
 // import { Badge } from '@/components/ui/badge';
 // import { Button } from '@/components/ui/button';
@@ -97,14 +98,14 @@ export function Dashboard({ incidents }: DashboardProps) {
       {
         data: [35, 28, 22],
         backgroundColor: [
-          '#E53935', // red-500
-          '#FB8C00', // amber-500
-          '#1E88E5', // blue-500
+          '#D02A48', // red-500
+          '#FE4733', // amber-500
+          '#FFB223', // blue-500
         ],
         borderColor: [
-          '#E53935',
-          '#FB8C00',
-          '#1E88E5',
+          '#D02A48',
+          '#FE4733',
+          '#FFB223',
         ],
         borderWidth: 0,
       },
@@ -134,6 +135,13 @@ export function Dashboard({ incidents }: DashboardProps) {
           <h1 className="text-xl font-semibold capitalize">
             Dashboard
           </h1>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Button variant="outline">
+            <Download className="mr-2 h-4 w-4" />
+            Last
+          </Button>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline">
@@ -170,16 +178,68 @@ export function Dashboard({ incidents }: DashboardProps) {
             <ProgressBar value={ack} target={80} tone="ok" />
           </CardContent> */}
           </Card>
-          <Card>
-            <CardHeader className="gap-1 pb-2">
-              <CardDescription>Override Rate</CardDescription>
-              critical/med/low
-              <CardTitle className="text-3xl">{override}%</CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
+          <div className='flex flex-col gap-y-4 h-full'>
+            <Card className='h-full'>
+              <CardHeader className="gap-1 pb-2">
+                <CardDescription>Override Rate</CardDescription>
+                <div className='flex flex-row justify-between'>
+                  <div className='flex flex-col'>
+                    <div className='text-muted-foreground'>
+                      Critical
+                    </div>
+                    <div className='text-[#D02A48] font-[800]'>
+                      30%
+                    </div>
+                  </div>
+                  <div className='flex flex-col'>
+                    <div className='text-muted-foreground'>
+                      Medium
+                    </div>
+                    <div className='text-[#FE4733] font-[800]'>
+                      60%
+                    </div>
+                  </div>
+                  <div className='flex flex-col'>
+                    <div className='text-muted-foreground'>
+                      Low
+                    </div>
+                    <div className='text-[#FFB223] font-[800]'>
+                      75%
+                    </div>
+                  </div>
+                </div>
+                {/* critical/med/low */}
+                {/* <CardTitle className="text-3xl">{override}%</CardTitle> */}
+              </CardHeader>
+              {/* <CardContent className="pt-0">
               <ProgressBar value={override} target={10} tone="warn" />
-            </CardContent>
-          </Card>
+            </CardContent> */}
+            </Card>
+            <div className='flex flex-row gap-4'>
+              <Card className='h-full w-full'>
+                <CardHeader className="gap-1 pb-2">
+                  <CardDescription>Masked Rate</CardDescription>
+                  
+                  {/* critical/med/low */}
+                  <CardTitle className="text-3xl">{30}%</CardTitle>
+                </CardHeader>
+                {/* <CardContent className="pt-0">
+              <ProgressBar value={override} target={10} tone="warn" />
+            </CardContent> */}
+              </Card>
+              <Card className='h-full w-full'>
+                <CardHeader className="gap-1 pb-2">
+                  <CardDescription>Stop Rate</CardDescription>
+                
+                  {/* critical/med/low */}
+                  <CardTitle className="text-3xl">{23}%</CardTitle>
+                </CardHeader>
+                {/* <CardContent className="pt-0">
+              <ProgressBar value={override} target={10} tone="warn" />
+            </CardContent> */}
+              </Card>
+            </div>
+          </div>
           <Card>
             <CardHeader className="gap-1 pb-2">
               <CardDescription>Risk Reduction</CardDescription>

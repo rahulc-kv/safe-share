@@ -1,8 +1,11 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { SeverityBadge, EntityPills } from '../common';
+import { EntityPills } from '../common';
 import type { Incident } from '../../types';
+import { HighIcon } from './icons/HighIcon';
+import { MediumIcon } from './icons/MediumIcon';
+import { LowIcon } from './icons/LowIcon';
 
 interface IncidentTableProps {
   items: Incident[];
@@ -34,7 +37,8 @@ export function IncidentTable({ items, onOpen, hideAction = false }: IncidentTab
                 {`INC-${i.id.slice(i.id.length-4)}`}
               </TableCell>
               <TableCell>
-                <SeverityBadge value={i.severity} />
+                {i.severity.toLowerCase() === "high" ? <HighIcon /> : i.severity.toLowerCase() === "medium" ? <MediumIcon /> : <LowIcon />}
+                {/* <SeverityBadge value={i.severity} /> */}
               </TableCell>
               <TableCell>
                 <EntityPills entities={i.entities} />
@@ -52,9 +56,9 @@ export function IncidentTable({ items, onOpen, hideAction = false }: IncidentTab
                 {i.user_action.type === "override" ? (
                   <Badge variant="destructive">Override</Badge>
                 ) : i.user_action.type === "masked" ? (
-                  <Badge>Masked</Badge>
+                  <Badge className='bg-[#C0A444]'>Masked</Badge>
                 ) : (
-                  <Badge variant="secondary">SafeSend</Badge>
+                  <Badge variant="secondary" className='bg-[#4AA67C] text-[#ffffff]'>Stopped</Badge>
                 )}
               </TableCell>}
               <TableCell className="text-sm truncate max-w-[200px]">

@@ -1,12 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, {  } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Copy, Edit, MoreHorizontal, Trash2 } from 'lucide-react';
 import type { PolicyData } from '../../types';
-import { supabaseApi } from '@/supabase/api';
 
 interface PolicyListProps {
   policies: PolicyData[];
@@ -19,7 +18,7 @@ export function PolicyList({ openEditor, policies, setPolicies }: PolicyListProp
     <Card>
       <CardHeader className="flex justify-between items-start">
         <div>
-          <CardTitle className="text-base">Policies</CardTitle>
+          {/* <CardTitle className="text-base">Policies</CardTitle> */}
           <CardDescription>Create, edit, and organize detection & enforcement rules</CardDescription>
         </div>
         {/* <div className="flex gap-2 ">
