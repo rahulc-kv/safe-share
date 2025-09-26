@@ -34,9 +34,9 @@ export const INITIAL_POLICIES: PolicyData[] = [
     prompt: "Flag Indian PAN and cloud secrets with context.", 
     rule_logic: { 
       entities: [{ type: "PAN" }, { type: "AWS_SECRET" }], 
-      thresholds: { severity: { nudge: 30, soft: 60, hard: 80 } } 
+      thresholds: { severity: { override: 30, mask: 60, delete: 80 } } 
     }, 
-    mode: ["soft"], 
+    mode: ["mask"], 
     scope: { users: ["*"], groups: ["Finance", "Delivery"], apps: ["*"] }, 
     exceptions: [], 
     version: "1.2.0", 
@@ -53,9 +53,9 @@ export const INITIAL_POLICIES: PolicyData[] = [
     prompt: "Identify Aadhaar sequences in Indian formats", 
     rule_logic: { 
       entities: [{ type: "Aadhaar" }], 
-      thresholds: { severity: { nudge: 20, soft: 50, hard: 75 } }
+      thresholds: { severity: { override: 20, mask: 50, delete: 75 } }
     }, 
-    mode: ["nudge"], 
+    mode: ["override"], 
     scope: { users: ["*"], groups: ["Sales"], apps: ["*"] }, 
     exceptions: [], 
     version: "1.0.3", 
@@ -72,9 +72,9 @@ export const INITIAL_POLICIES: PolicyData[] = [
     prompt: "Identify Aadhaar sequences in Indian formats", 
     rule_logic: { 
       entities: [{ type: "Aadhaar" }], 
-      thresholds: { severity: { nudge: 20, soft: 50, hard: 75 } }
+      thresholds: { severity: { override: 20, mask: 50, delete: 75 } }
     }, 
-    mode: ["nudge"], 
+    mode: ["override"], 
     scope: { users: ["*"], groups: ["Sales"], apps: ["*"] }, 
     exceptions: [], 
     version: "1.0.3", 

@@ -53,9 +53,9 @@ function transformIncidentData(data: IncidentData): Incident[] {
     console.log('====', rule);
 
     // Determine decision based on action
-    const decision: "hard_block" | "soft_block" | "nudge" =
-      item.action === "block" ? "hard_block" :
-        item.action === "warn" ? "soft_block" : "nudge";
+    const decision: "delete" | "mask" | "override" =
+      item.action === "block" ? "delete" :
+        item.action === "warn" ? "mask" : "override";
 
     // Determine tab based on action
     const tab: "alert" | "success" =

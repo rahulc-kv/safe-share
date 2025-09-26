@@ -27,7 +27,7 @@ export interface Incident {
   id: string;
   time: string;
   severity: string;
-  decision: "hard_block" | "soft_block" | "nudge";
+  decision: "delete" | "mask" | "override";
   tab: "alert" | "success";
   channel: Channel;
   user: User;

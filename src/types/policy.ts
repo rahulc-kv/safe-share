@@ -4,9 +4,9 @@ export interface PolicyEntity {
 
 export interface PolicyThresholds {
   severity: {
-    nudge: number;
-    soft: number;
-    hard: number;
+    override: number;
+    mask: number;
+    delete: number;
   };
 }
 
@@ -35,7 +35,7 @@ export interface PolicyForm {
 }
 
 export interface PolicyData {
-  id: string;
+  id?: string;
   name: string;
   author?: string;
   tags: string[];

@@ -119,75 +119,76 @@ export function PolicyEditorDialog({ open, setOpen, save, initial }: PolicyEdito
     // source_mapping: "",
     description: "",
     prompt: "",
-    mode: ["soft"],
+    mode: ["mask"],
     version: "1.0.0",
     status: "inactive"
   });
 
   useEffect(() => {
-    if (initial) {
-      setForm({
-        name: initial.name,
-        // author: initial.author,
-        tags: initial.tags.join(", "),
-        // source_type: initial.source_type,
-        // source_mapping: initial.source_mapping.join(", "),
-        description: initial.description,
-        prompt: initial.prompt,
-        mode: initial.mode || ["soft"],
-        version: initial.version,
-        status: initial.status,
-
-      });
-    } else {
-      setForm({
-        name: "",
-        // author: "",
-        tags: "",
-        // source_type: "internal",
-        // source_mapping: "",
-        description: "",
-        prompt: "",
-        mode: ["soft"],
-        version: "1.0.0",
-        status: "inactive"
-      });
+    if (open) {
+      if (initial) {
+        // Edit existing policy
+        setForm({
+          name: initial.name,
+          // author: initial.author,
+          tags: initial.tags.join(", "),
+          // source_type: initial.source_type,
+          // source_mapping: initial.source_mapping.join(", "),
+          description: initial.description,
+          prompt: initial.prompt,
+          mode: Array.isArray(initial.mode) ? initial.mode : ["mask"],
+          version: initial.version,
+          status: initial.status,
+        });
+      } else {
+        // Create new policy
+        setForm({
+          name: "",
+          // author: "",
+          tags: "",
+          // source_type: "internal",
+          // source_mapping: "",
+          description: "",
+          prompt: "",
+          mode: ["mask"],
+          version: "1.0.0",
+          status: "inactive"
+        });
+      }
     }
   }, [initial, open]);
 
   function handleSave() {
     const tags = String(form.tags || "").split(",").map((s) => s.trim()).filter(Boolean);
-    // const mapping = String(form.source_mapping || "").split(",").map((s) => s.trim()).filter(Boolean);
+    
     const payload: PolicyData = {
-      id: initial?.id || `pol_${randId()}`,
+      id: initial?.id, // Use existing ID for edit, generate new for create
       name: form.name,
-      // author: form.author,
       tags,
-      // source_type: form.source_type,
-      // source_mapping: mapping,
       description: form.description,
       prompt: form.prompt,
       rule_logic: { 
         entities: [{ type: "PAN" }], 
         thresholds: { 
           severity: { 
-            nudge: 30, 
-            soft: 60, 
-            hard: 80 
+            override: 30, 
+            mask: 60, 
+            delete: 80 
           } 
         } 
       },
-      mode: form.mode,
+      mode: form.mode, // Now supports multiple selections
       scope: { users: ["*"], groups: ["*"], apps: ["*"] },
       exceptions: [],
       version: form.version,
       status: form.status,
     };
+    
     save(payload);
     setOpen(false);
   }
 
-  const valid = form.name && form.prompt;
+  const valid = form.name.trim() && form.prompt.trim() && form.mode.length > 0;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -267,10 +268,9 @@ export function PolicyEditorDialog({ open, setOpen, save, initial }: PolicyEdito
               value={form.mode}
               onChange={(value) => setForm({ ...form, mode: value })}
               options={[
-                { value: "nudge", label: "Nudge" },
-                { value: "soft", label: "Masked" },
-                { value: "hard", label: "Override" },
-                { value: "safe-send", label: "Safe-send" }
+                { value: "override", label: "Override" },
+                { value: "mask", label: "Mask" },
+                { value: "delete", label: "Delete" }
               ]}
               placeholder="Select modes..."
             />
