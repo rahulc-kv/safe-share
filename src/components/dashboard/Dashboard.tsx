@@ -175,12 +175,12 @@ export function Dashboard({ incidents }: DashboardProps) {
           </h1>
         </div>
 
-        <div className="flex items-center gap-2">
+        {/* <div className="flex items-center gap-2">
           <Button variant="outline">
             <Download className="mr-2 h-4 w-4" />
             Last
           </Button>
-        </div>
+        </div> */}
         <div className="flex items-center gap-2">
           <Button variant="outline">
             <Download className="mr-2 h-4 w-4" />
