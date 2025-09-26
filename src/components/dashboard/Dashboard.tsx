@@ -5,12 +5,15 @@ import { useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { DonutChart } from '@/components/ui/donut-chart';
 import { LineChart } from '@/components/ui/line-chart';
+import { PieChart } from '@/components/ui/pie-chart';
 // import { AlertTriangle, CheckCircle2, Download } from 'lucide-react';
 import type { Incident } from '../../types';
 import { supabaseApi } from '@/supabase/api';
 import { Button } from '../ui/button';
 import { Icons } from '../layout/Sidebar';
 import { Download } from 'lucide-react';
+import { LineGraph } from './icons/LineGraph';
+import { Up } from './icons/Up';
 
 interface DashboardProps {
   incidents: Incident[];
@@ -42,7 +45,7 @@ const ProgressBar = ({
       </div>
       <div className="flex justify-between text-xs text-muted-foreground">
         <span>Target: {target}%</span>
-        <span>{value}%</span>
+        {/* <span>{value}%</span> */}
       </div>
     </div>
   );
@@ -119,12 +122,47 @@ export function Dashboard({ incidents }: DashboardProps) {
     labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
     datasets: [
       {
-        label: 'Acknowledgement Rate',
+        label: 'Override Rate',
         data: [38, 45, 28, 31],
         borderColor: '#10b981', // emerald-500
         tension: 0.4,
       },
+      {
+        label: 'Masked Rate',
+        data: [48, 35, 18, 61],
+        borderColor: '#104eb9', // emerald-500
+        tension: 0.4,
+      },
+      {
+        label: 'Stopped Rate',
+        data: [28, 55, 16, 41],
+        borderColor: '#a9b110', // emerald-500
+        tension: 0.4,
+      },
     ],
+  };
+
+  // Pie chart data for user actions distribution
+  const pieChartData = {
+    labels: ['PAN Numbers', 'Email Addresses', 'Phone Numbers', 'Aadhaar Numbers'],
+    datasets: [
+      {
+        data: [35, 28, 22, 15],
+        backgroundColor: [
+          '#ef4444', // red-500
+          '#f59e0b', // amber-500
+          '#3b82f6', // blue-500
+          '#10b981', // emerald-500
+        ],
+        borderColor: [
+          '#ef4444',
+          '#f59e0b',
+          '#3b82f6',
+          '#10b981',
+        ],
+        borderWidth: 0,
+      },
+    ]
   };
 
   return (
@@ -215,11 +253,11 @@ export function Dashboard({ incidents }: DashboardProps) {
               <ProgressBar value={override} target={10} tone="warn" />
             </CardContent> */}
             </Card>
-            <div className='flex flex-row gap-4'>
+            <div className='flex flex-row gap-4 h-full'>
               <Card className='h-full w-full'>
                 <CardHeader className="gap-1 pb-2">
                   <CardDescription>Masked Rate</CardDescription>
-                  
+
                   {/* critical/med/low */}
                   <CardTitle className="text-3xl">{30}%</CardTitle>
                 </CardHeader>
@@ -230,7 +268,7 @@ export function Dashboard({ incidents }: DashboardProps) {
               <Card className='h-full w-full'>
                 <CardHeader className="gap-1 pb-2">
                   <CardDescription>Stop Rate</CardDescription>
-                
+
                   {/* critical/med/low */}
                   <CardTitle className="text-3xl">{23}%</CardTitle>
                 </CardHeader>
@@ -240,24 +278,45 @@ export function Dashboard({ incidents }: DashboardProps) {
               </Card>
             </div>
           </div>
-          <Card>
-            <CardHeader className="gap-1 pb-2">
-              <CardDescription>Risk Reduction</CardDescription>
-              <CardTitle className="text-3xl">52%</CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <ProgressBar value={52} target={50} tone="info" />
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="gap-1 pb-2">
-              <CardDescription>Protected Users</CardDescription>
-              <CardTitle className="text-3xl">1,247</CardTitle>
-            </CardHeader>
-            {/* <CardContent className="pt-0 text-xs text-muted-foreground">
+          <div className='flex flex-col w-full gap-4 h-full col-span-2'>
+            <div className='flex flex-row w-full gap-4 h-full'>
+              <Card className='w-full'>
+                <CardHeader className="gap-1 pb-2">
+                  <CardDescription>Risk Reduction</CardDescription>
+                  <CardTitle className="text-3xl">52%</CardTitle>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <ProgressBar value={52} target={90} tone="info" />
+                </CardContent>
+              </Card>
+              <Card className='w-full'>
+                <CardHeader className="gap-1 pb-2">
+                  <CardDescription>Protected Users</CardDescription>
+                  <CardTitle className="text-3xl">1,247 <span className='text-sm font-[400] text-muted-foreground'> across all workspace</span></CardTitle>
+                </CardHeader>
+                {/* <CardContent className="pt-0 text-xs text-muted-foreground">
             Across 3 workspaces
           </CardContent> */}
-          </Card>
+              </Card>
+            </div>
+            <Card className='w-full h-full'>
+              <CardHeader className="gap-1 pb-2">
+                <CardDescription>Mean time to investigate(MTTI):</CardDescription>
+                {/* <CardTitle className="text-3xl">52%</CardTitle> */}
+              </CardHeader>
+              <div className='flex relative'>
+                <div className='flex flex-col absolute left-5'>
+                  <div className='text-xl font-[800]'>2 min</div>
+                </div>
+                <div className='pl-[30%] w-[100%] h-[30%] pr-[20px]'>
+                  <LineGraph style={{ width: '100%' }} />
+                </div>
+              </div>
+              <div className='flex flex-row pl-5'>
+                 <div className=' flex flex-row px-1 text-xs text-muted-foreground pb-2'>21.8% <Up />  Increase in investigation time observed(30 days)</div>
+              </div>
+            </Card>
+          </div>
         </div>
 
         {/* Charts row */}
@@ -265,10 +324,10 @@ export function Dashboard({ incidents }: DashboardProps) {
           <Card className="lg:col-span-2">
             <CardHeader>
               <CardTitle className="text-base">Nudge Performance Trends</CardTitle>
-              <CardDescription>Weekly acknowledgement and override rates</CardDescription>
+              <CardDescription>Weekly acknowledgement of overrided, masked and stopped alers</CardDescription>
             </CardHeader>
             <CardContent>
-              <LineChart data={lineChartData} />
+              <LineChart data={lineChartData} height='h-[280px]'/>
             </CardContent>
           </Card>
           <Card>
@@ -278,12 +337,12 @@ export function Dashboard({ incidents }: DashboardProps) {
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-6">
-                <DonutChart
+                <PieChart
                   data={donutData}
-                  centerText={totalViolations}
-                  centerSubtext="Violations"
+                // centerText={totalViolations}
+                // centerSubtext="Violations"
                 />
-                <div className="space-y-2 text-sm">
+                {/* <div className="space-y-2 text-sm">
                   <div className="flex items-center gap-2">
                     <span className="h-2 w-2 rounded-full bg-red-500" />
                     PAN Numbers: 35
@@ -300,11 +359,55 @@ export function Dashboard({ incidents }: DashboardProps) {
                     <span className="h-2 w-2 rounded-full bg-emerald-500" />
                     Aadhaar Numbers: 15
                   </div>
-                </div>
+                </div> */}
               </div>
             </CardContent>
           </Card>
         </div>
+
+        {/* Additional charts row */}
+        {/* <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">User Actions Distribution</CardTitle>
+              <CardDescription>How users respond to security alerts</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <PieChart data={pieChartData} height={250} />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Channel Activity</CardTitle>
+              <CardDescription>Security incidents by communication channel</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="h-3 w-3 rounded-full bg-blue-500" />
+                    <span className="text-sm">Slack</span>
+                  </div>
+                  <span className="text-sm font-medium">65%</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="h-3 w-3 rounded-full bg-green-500" />
+                    <span className="text-sm">Gmail</span>
+                  </div>
+                  <span className="text-sm font-medium">25%</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="h-3 w-3 rounded-full bg-orange-500" />
+                    <span className="text-sm">Outlook</span>
+                  </div>
+                  <span className="text-sm font-medium">10%</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div> */}
 
         {/* Recent incidents */}
         {/* <Card>
