@@ -31,7 +31,7 @@ export function Sidebar() {
   return (
     <aside className="sticky top-0 hidden h-screen w-64 flex-shrink-0 border-r p-4 md:block">
       <div className="mb-6 flex items-center justify-between">
-        <div className="text-lg font-bold tracking-tight">safeshare.ai</div>
+        <div className="text-lg font-bold tracking-tight">SafeSend.ai</div>
         {/* <Badge variant="secondary">Admin</Badge> */}
       </div>
       <nav className="space-y-1">
