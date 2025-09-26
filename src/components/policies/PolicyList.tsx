@@ -52,12 +52,19 @@ export function PolicyList({ openEditor, policies, setPolicies }: PolicyListProp
                     ))}
                   </TableCell>
                   <TableCell className="space-x-1">
-                  {p.mode.map((m: string) => (
-                    <Badge key={m}>{m}</Badge>
-                  ))}
+                    {p.mode.map((m: string) => (
+                      <Badge key={m} variant="outline">{m}</Badge>
+                    ))}
                   </TableCell>
                   <TableCell>v{p.version}</TableCell>
-                  <TableCell className="capitalize">{p.status}</TableCell>
+                  <TableCell>
+                    <Badge 
+                      variant={p.status === "active" ? "default" : "secondary"}
+                      className={p.status === "active" ? "bg-green-100 text-green-800 hover:bg-green-100" : ""}
+                    >
+                      {p.status === "active" ? "Active" : "Inactive"}
+                    </Badge>
+                  </TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>

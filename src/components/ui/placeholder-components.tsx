@@ -105,18 +105,47 @@ export const Select = ({ children, value, onValueChange, ...props }: any) => {
     }
   }, [])
 
+  // Find all SelectItem children to pass to SelectValue
+  const selectItems = React.Children.toArray(children).flatMap((child) => {
+    if (React.isValidElement(child)) {
+      const childType = child.type;
+      const childTypeName = typeof childType === 'function' ? childType.name : childType;
+      
+      if (child.type === SelectContent || childTypeName === 'SelectContent') {
+        return React.Children.toArray((child as React.ReactElement<any>).props.children).filter(
+          (grandchild) => {
+            if (React.isValidElement(grandchild)) {
+              const grandchildType = grandchild.type;
+              const grandchildTypeName = typeof grandchildType === 'function' ? grandchildType.name : grandchildType;
+              return grandchild.type === SelectItem || grandchildTypeName === 'SelectItem';
+            }
+            return false;
+          }
+        )
+      }
+    }
+    return []
+  })
+
   return (
     <div className="relative" ref={selectRef} {...props}>
       {React.Children.map(children, (child) => {
         if (React.isValidElement(child)) {
-          if (child.type === SelectTrigger) {
+          const childType = child.type;
+          const childTypeName = typeof childType === 'function' ? childType.name : childType;
+          
+          if (child.type === SelectTrigger || childTypeName === 'SelectTrigger') {
             return React.cloneElement(child as React.ReactElement<any>, { 
+              ...(child.props as any),
               onClick: () => setOpen(!open),
-              'data-state': open ? 'open' : 'closed'
+              'data-state': open ? 'open' : 'closed',
+              value,
+              selectItems
             })
           }
-          if (child.type === SelectContent) {
+          if (child.type === SelectContent || childTypeName === 'SelectContent') {
             return React.cloneElement(child as React.ReactElement<any>, { 
+              ...(child.props as any),
               open,
               onClose: () => setOpen(false),
               onValueChange: (val: string) => {
@@ -132,13 +161,27 @@ export const Select = ({ children, value, onValueChange, ...props }: any) => {
   )
 }
 
-export const SelectTrigger = ({ children, className, onClick, ...props }: any) => (
+export const SelectTrigger = ({ children, className, onClick, value, selectItems, ...props }: any) => (
   <button 
     className={cn("flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50", className)}
     onClick={onClick}
     {...props}
   >
-    {children}
+    {React.Children.map(children, (child) => {
+      if (React.isValidElement(child)) {
+        const childType = child.type;
+        const childTypeName = typeof childType === 'function' ? childType.name : childType;
+        
+        if (child.type === SelectValue || childTypeName === 'SelectValue') {
+          return React.cloneElement(child as React.ReactElement<any>, { 
+            ...(child.props as any),
+            value,
+            selectItems
+          })
+        }
+      }
+      return child
+    })}
     <svg
       className="h-4 w-4 opacity-50"
       fill="none"
@@ -151,13 +194,31 @@ export const SelectTrigger = ({ children, className, onClick, ...props }: any) =
   </button>
 )
 
-export const SelectValue = ({ placeholder, value, children, ...props }: any) => {
-  // Find the selected item's text from children
+export const SelectValue = ({ placeholder, value, selectItems, children, ...props }: any) => {
+  // Find the selected item's text from selectItems
   const getSelectedText = () => {
+    // If explicit children provided, use them
     if (children) {
       return children
     }
-    return placeholder
+    
+    // Try to find from selectItems
+    if (value && selectItems && Array.isArray(selectItems)) {
+      const selectedItem = selectItems.find((item: any) => 
+        React.isValidElement(item) && (item.props as any).value === value
+      )
+      if (selectedItem && React.isValidElement(selectedItem)) {
+        return (selectedItem.props as any).children
+      }
+    }
+    
+    // Fallback to showing the value itself if it's a readable string
+    if (value && typeof value === 'string') {
+      // Capitalize first letter for better display
+      return value.charAt(0).toUpperCase() + value.slice(1)
+    }
+    
+    return placeholder || "Select an option..."
   }
 
   return (
@@ -171,10 +232,16 @@ export const SelectContent = ({ children, open, onClose, onValueChange, ...props
   return (
     <div className="absolute top-full z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md mt-1" {...props}>
       {React.Children.map(children, (child) => {
-        if (React.isValidElement(child) && child.type === SelectItem) {
-          return React.cloneElement(child as React.ReactElement<any>, { 
-            onClick: () => onValueChange?.((child as React.ReactElement<any>).props.value)
-          })
+        if (React.isValidElement(child)) {
+          const childType = child.type;
+          const childTypeName = typeof childType === 'function' ? childType.name : childType;
+          
+          if (child.type === SelectItem || childTypeName === 'SelectItem') {
+            return React.cloneElement(child as React.ReactElement<any>, { 
+              ...(child.props as any),
+              onClick: () => onValueChange?.((child as React.ReactElement<any>).props.value)
+            })
+          }
         }
         return child
       })}
@@ -293,15 +360,20 @@ export const DropdownMenu = ({ children, ...props }: any) => {
     <div className="relative" ref={dropdownRef} {...props}>
       {React.Children.map(children, (child) => {
         if (React.isValidElement(child)) {
-          if (child.type === DropdownMenuTrigger) {
+          const childType = child.type;
+          const childTypeName = typeof childType === 'function' ? childType.name : childType;
+          
+          if (child.type === DropdownMenuTrigger || childTypeName === 'DropdownMenuTrigger') {
             return React.cloneElement(child as React.ReactElement<any>, { 
+              ...(child.props as any),
               open,
               setOpen,
               triggerRef
             })
           }
-          if (child.type === DropdownMenuContent) {
+          if (child.type === DropdownMenuContent || childTypeName === 'DropdownMenuContent') {
             return React.cloneElement(child as React.ReactElement<any>, { 
+              ...(child.props as any),
               open,
               setOpen,
               closeDropdown,
@@ -317,7 +389,11 @@ export const DropdownMenu = ({ children, ...props }: any) => {
 
 export const DropdownMenuTrigger = ({ children, asChild, open, setOpen, triggerRef, ...props }: any) => {
   const handleClick = () => {
-    setOpen(!open)
+    if (typeof setOpen === 'function') {
+      setOpen(!open)
+    } else {
+      console.warn('DropdownMenuTrigger: setOpen is not a function. Make sure DropdownMenuTrigger is used within a DropdownMenu component.')
+    }
   }
 
   if (asChild && React.isValidElement(children)) {
@@ -389,6 +465,7 @@ export const DropdownMenuContent = ({ children, align = "start", className, open
       {React.Children.map(children, (child) => {
         if (React.isValidElement(child) && child.type === DropdownMenuItem) {
           return React.cloneElement(child as React.ReactElement<any>, { 
+            ...(child.props as any),
             closeDropdown
           })
         }

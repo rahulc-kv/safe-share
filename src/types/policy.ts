@@ -29,7 +29,7 @@ export interface PolicyForm {
   // source_mapping: string;
   description: string;
   prompt: string;
-  mode: string;
+  mode: string[];
   version: string;
   status: "active" | "inactive";
 }

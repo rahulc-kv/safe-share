@@ -1,19 +1,113 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Save } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@/components/ui/badge';
+import { Save, ChevronDown, X } from 'lucide-react';
 import type { PolicyData, PolicyForm } from '../../types';
 import { randId } from '../../utils/helpers';
+import { cn } from '@/lib/utils';
 
 interface PolicyEditorDialogProps {
   open: boolean;
   setOpen: (open: boolean) => void;
   save: (policy: PolicyData) => void;
   initial?: PolicyData;
+}
+
+// MultiSelect Component
+interface MultiSelectProps {
+  value: string[];
+  onChange: (value: string[]) => void;
+  options: { value: string; label: string }[];
+  placeholder?: string;
+  className?: string;
+}
+
+function MultiSelect({ value, onChange, options, placeholder = "Select options...", className }: MultiSelectProps) {
+  const [open, setOpen] = useState(false);
+  const selectRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (selectRef.current && !selectRef.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const handleToggle = (optionValue: string) => {
+    const newValue = value.includes(optionValue)
+      ? value.filter(v => v !== optionValue)
+      : [...value, optionValue];
+    onChange(newValue);
+  };
+
+  const handleRemove = (optionValue: string) => {
+    onChange(value.filter(v => v !== optionValue));
+  };
+
+  return (
+    <div className={cn("relative", className)} ref={selectRef}>
+      <button
+        type="button"
+        className="flex h-auto min-h-[2.5rem] w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+        onClick={() => setOpen(!open)}
+      >
+        <div className="flex flex-wrap gap-1">
+          {value.length === 0 ? (
+            <span className="text-muted-foreground">{placeholder}</span>
+          ) : (
+            value.map((val) => {
+              const option = options.find(opt => opt.value === val);
+              return (
+                <Badge key={val} variant="secondary" className="gap-1">
+                  {option?.label || val}
+                  <X
+                    className="h-3 w-3 cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRemove(val);
+                    }}
+                  />
+                </Badge>
+              );
+            })
+          )}
+        </div>
+        <ChevronDown className="h-4 w-4 opacity-50" />
+      </button>
+      
+      {open && (
+        <div className="absolute top-full z-50 mt-1 w-full rounded-md border bg-popover text-popover-foreground shadow-md">
+          <div className="p-1">
+            {options.map((option) => (
+              <div
+                key={option.value}
+                className="flex items-center space-x-2 rounded-sm px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground cursor-pointer"
+                onClick={() => handleToggle(option.value)}
+              >
+                <Checkbox
+                  checked={value.includes(option.value)}
+                  onCheckedChange={() => handleToggle(option.value)}
+                />
+                <span>{option.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export function PolicyEditorDialog({ open, setOpen, save, initial }: PolicyEditorDialogProps) {
@@ -25,7 +119,7 @@ export function PolicyEditorDialog({ open, setOpen, save, initial }: PolicyEdito
     // source_mapping: "",
     description: "",
     prompt: "",
-    mode: "nudge",
+    mode: ["soft"],
     version: "1.0.0",
     status: "inactive"
   });
@@ -40,7 +134,7 @@ export function PolicyEditorDialog({ open, setOpen, save, initial }: PolicyEdito
         // source_mapping: initial.source_mapping.join(", "),
         description: initial.description,
         prompt: initial.prompt,
-        mode: initial.mode.join(", "),
+        mode: initial.mode || ["soft"],
         version: initial.version,
         status: initial.status,
 
@@ -54,7 +148,7 @@ export function PolicyEditorDialog({ open, setOpen, save, initial }: PolicyEdito
         // source_mapping: "",
         description: "",
         prompt: "",
-        mode: "nudge",
+        mode: ["soft"],
         version: "1.0.0",
         status: "inactive"
       });
@@ -83,7 +177,7 @@ export function PolicyEditorDialog({ open, setOpen, save, initial }: PolicyEdito
           } 
         } 
       },
-      mode: form.mode.split(","),
+      mode: form.mode,
       scope: { users: ["*"], groups: ["*"], apps: ["*"] },
       exceptions: [],
       version: form.version,
@@ -169,18 +263,17 @@ export function PolicyEditorDialog({ open, setOpen, save, initial }: PolicyEdito
           </div>
           <div className="space-y-2">
             <Label>Mode</Label>
-            <Select 
-              value={form.mode} 
-              onValueChange={(v: "nudge" | "soft" | "hard") => setForm({ ...form, mode: v })}
-            >
-              <SelectTrigger><SelectValue/></SelectTrigger>
-              <SelectContent>
-                {/* <SelectItem value="nudge">Nudge</SelectItem> */}
-                <SelectItem value="soft">Masked</SelectItem>
-                <SelectItem value="hard">Override</SelectItem>
-                <SelectItem value="hard">Safe-send</SelectItem>
-              </SelectContent>
-            </Select>
+            <MultiSelect
+              value={form.mode}
+              onChange={(value) => setForm({ ...form, mode: value })}
+              options={[
+                { value: "nudge", label: "Nudge" },
+                { value: "soft", label: "Masked" },
+                { value: "hard", label: "Override" },
+                { value: "safe-send", label: "Safe-send" }
+              ]}
+              placeholder="Select modes..."
+            />
           </div>
           <div className="space-y-2">
             <Label>Status</Label>
@@ -188,7 +281,7 @@ export function PolicyEditorDialog({ open, setOpen, save, initial }: PolicyEdito
               value={form.status} 
               onValueChange={(v: "inactive" | "active") => setForm({ ...form, status: v })}
             >
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger><SelectValue placeholder="Select status..." /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="active">Active</SelectItem>
                 <SelectItem value="inactive">Inactive</SelectItem>
